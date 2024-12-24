@@ -1,10 +1,12 @@
 flutter_launcher_icons:
-  android: "launcher_icon"
   ios: true
+  android: true
   image_path: "assets/icon/icon_simple_geo_cam.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
-  remove_alpha_channel_ios: true
   remove_alpha_ios: true
+  remove_alpha_channel_ios: true
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/icon/icon_simple_geo_cam.png"
   web:
     generate: true
     image_path: "assets/icon/icon_simple_geo_cam.png"

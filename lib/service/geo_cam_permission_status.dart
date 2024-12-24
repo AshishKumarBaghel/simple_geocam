@@ -1,7 +1,7 @@
 enum GeoCamPermissionStatus {
-  denied,
-  granted,
-  alreadyDenied,
-  alreadyGranted,
-  permanentlyDenied,
+  isDenied,
+  isAlreadyDenied,
+  isGranted,
+  isAlreadyGranted,
+  isLimited,
 }

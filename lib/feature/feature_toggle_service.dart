@@ -1,3 +1,3 @@
 class FeatureToggleService {
-  static bool isAdEnabled = false;
+  static bool isAdEnabled = true;
 }

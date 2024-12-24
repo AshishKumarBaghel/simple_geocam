@@ -19,7 +19,6 @@ class PermissionsScreen extends StatefulWidget {
 class _PermissionsScreenState extends State<PermissionsScreen> {
   bool isPermissionsLoading = true;
   bool isCameraAccess = false;
-  bool isMicrophoneAccess = false;
   bool isPhotoLibraryAccess = false;
   bool isLocationAccess = false;
   PermissionService permissionService = PermissionService();
@@ -70,12 +69,6 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                     onChanged: _cameraAccessOnChanged,
                     isActive: isCameraAccess),
                 buildAccessTile(context,
-                    icon: Icons.mic,
-                    title: 'Microphone Access',
-                    subtitle: 'Microphone access is essential for high-quality video recording.',
-                    onChanged: _microphoneAccessOnChanged,
-                    isActive: isMicrophoneAccess),
-                buildAccessTile(context,
                     icon: Icons.photo,
                     title: 'Photo Library Access',
                     subtitle: 'Permission is required to access the photo library on this device.',
@@ -91,9 +84,10 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                 ),
                 Spacer(),
                 ElevatedButton(
-                  onPressed: isCameraAccess && isPhotoLibraryAccess && isMicrophoneAccess ? nextButton : null, // Blank method
+                  onPressed: isCameraAccess && isPhotoLibraryAccess && isLocationAccess ? nextButton : null,
+                  // Blank method
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isCameraAccess && isPhotoLibraryAccess && isMicrophoneAccess ? Colors.yellow[800] : Colors.grey,
+                    backgroundColor: isCameraAccess && isPhotoLibraryAccess && isLocationAccess ? Colors.yellow[800] : Colors.grey,
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
@@ -167,36 +161,14 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
       // Perform asynchronous permission request
       Permission permissionCamera = permissionService.permissionCamera;
       GeoCamPermissionStatus permissionStatus = await permissionService.requirePermission(permission: permissionCamera);
-      if (GeoCamPermissionStatus.alreadyDenied == permissionStatus) {
+      if (GeoCamPermissionStatus.isAlreadyDenied == permissionStatus) {
         showPermissionDialog(context);
         return;
       }
       // Update the state synchronously
       setState(() {
-        if (GeoCamPermissionStatus.granted == permissionStatus || GeoCamPermissionStatus.alreadyGranted == permissionStatus) {
+        if (GeoCamPermissionStatus.isGranted == permissionStatus || GeoCamPermissionStatus.isAlreadyGranted == permissionStatus) {
           isCameraAccess = true;
-        } else {
-          SnackBarUtil().message(context: context, message: 'Application requires this permission to function properly');
-        }
-      });
-    } else {
-      // If permission is denied, prompt the user to open settings
-      SnackBarUtil().message(context: context, message: 'To revoke permission please go to system app settings');
-    }
-  }
-
-  void _microphoneAccessOnChanged(bool toggleValue) async {
-    if (toggleValue) {
-      Permission permissionMicrophone = permissionService.permissionMicrophone;
-      GeoCamPermissionStatus permissionStatus = await permissionService.requirePermission(permission: permissionMicrophone);
-      if (GeoCamPermissionStatus.alreadyDenied == permissionStatus) {
-        showPermissionDialog(context);
-        return;
-      }
-      // Update the state synchronously
-      setState(() {
-        if (GeoCamPermissionStatus.granted == permissionStatus || GeoCamPermissionStatus.alreadyGranted == permissionStatus) {
-          isMicrophoneAccess = true;
         } else {
           SnackBarUtil().message(context: context, message: 'Application requires this permission to function properly');
         }
@@ -211,12 +183,12 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     if (toggleValue) {
       Permission permissionPhoto = permissionService.permissionPhoto;
       GeoCamPermissionStatus permissionStatus = await permissionService.requirePermission(permission: permissionPhoto);
-      if (GeoCamPermissionStatus.alreadyDenied == permissionStatus) {
+      if (GeoCamPermissionStatus.isAlreadyDenied == permissionStatus) {
         showPermissionDialog(context);
         return;
       }
       setState(() {
-        if (GeoCamPermissionStatus.granted == permissionStatus || GeoCamPermissionStatus.alreadyGranted == permissionStatus) {
+        if (GeoCamPermissionStatus.isGranted == permissionStatus || GeoCamPermissionStatus.isAlreadyGranted == permissionStatus) {
           isPhotoLibraryAccess = true;
         } else {
           SnackBarUtil().message(context: context, message: 'Application requires this permission to function properly');
@@ -232,12 +204,12 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     if (toggleValue) {
       Permission permissionLocation = permissionService.permissionLocation;
       GeoCamPermissionStatus permissionStatus = await permissionService.requirePermission(permission: permissionLocation);
-      if (GeoCamPermissionStatus.alreadyDenied == permissionStatus) {
+      if (GeoCamPermissionStatus.isAlreadyDenied == permissionStatus) {
         showPermissionDialog(context);
         return;
       }
       setState(() {
-        if (GeoCamPermissionStatus.granted == permissionStatus || GeoCamPermissionStatus.alreadyGranted == permissionStatus) {
+        if (GeoCamPermissionStatus.isGranted == permissionStatus || GeoCamPermissionStatus.isAlreadyGranted == permissionStatus) {
           isLocationAccess = true;
         } else {
           SnackBarUtil().message(context: context, message: 'Application requires this permission to function properly');
@@ -281,7 +253,6 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
 
   Future<void> getCurrentPermissionStatus() async {
     isCameraAccess = await permissionService.permissionCamera.status.isGranted;
-    isMicrophoneAccess = await permissionService.permissionPhoto.status.isGranted;
     isPhotoLibraryAccess = await permissionService.permissionPhoto.status.isGranted;
     isLocationAccess = await permissionService.permissionLocation.status.isGranted;
     setState(() {

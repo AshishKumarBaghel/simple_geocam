@@ -29,11 +29,9 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
     <key>GADApplicationIdentifier</key>
-    <string>ca-app-pub-3574406674493962~7153443197</string>
+    <string>ca-app-pub-3574406674493962~1224537086</string>
 	<key>NSCameraUsageDescription</key>
     <string>This app requires camera access to take photos.</string>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>This app requires microphone access to add on videos.</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>This app requires photo library access to show your photos.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
@@ -45,8 +43,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>

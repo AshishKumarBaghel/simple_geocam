@@ -1,6 +1,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:simple_geocam/service/geo_cam_service.dart';
+import 'package:simple_geocam/transport/geo_cam_transport.dart';
 
 import '../advertisement/admob_banner_ad.dart';
 import '../ui_widget/camera_button.dart';
@@ -18,6 +20,7 @@ class _CameraScreenState extends State<CameraScreen> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
   bool frontCameraToggle = false;
+  GeoCamService geoCamService = GeoCamService();
 
   @override
   void initState() {
@@ -54,6 +57,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   Widget build(BuildContext context) {
+    GeoCamTransport geoCamTransport = geoCamService.fetchGeoCamDetails();
     double parentWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Column(
@@ -122,37 +126,45 @@ class _CameraScreenState extends State<CameraScreen> {
                             color: Colors.black.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Column(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Ujjain, Madhya Pradesh, India',
-                                style: TextStyle(
+                                geoCamTransport.addressTitle,
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text(
-                                'Mahananda Nagar, Ujjain - 456010, Madhya Pradesh, India',
-                                style: TextStyle(
+                                geoCamTransport.address,
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
                                 ),
                               ),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text(
-                                'Lat 23.1500 Long 75.802633',
-                                style: TextStyle(
+                                'Lat ${geoCamTransport.lat}, Long ${geoCamTransport.lon}',
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
                                 ),
                               ),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text(
-                                '24/12/2024 8:30 AM GMT+5:30',
-                                style: TextStyle(
+                                geoCamService.format.format(geoCamTransport.dateTime.toLocal()),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Note: ${geoCamTransport.note}',
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
                                 ),

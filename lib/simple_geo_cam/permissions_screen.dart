@@ -46,7 +46,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.yellow[800],
+                      color: Colors.blue[800],
                     ),
                   ),
                 ),
@@ -87,15 +87,18 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                   onPressed: isCameraAccess && isPhotoLibraryAccess && isLocationAccess ? nextButton : null,
                   // Blank method
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isCameraAccess && isPhotoLibraryAccess && isLocationAccess ? Colors.yellow[800] : Colors.grey,
+                    backgroundColor: isCameraAccess && isPhotoLibraryAccess && isLocationAccess ? Colors.blue[800] : Colors.grey,
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Next',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: (isCameraAccess && isPhotoLibraryAccess && isLocationAccess) ? Colors.white : Colors.black),
                   ),
                 ),
               ],
@@ -122,7 +125,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Icon(icon, size: 30, color: Colors.orange),
+          Icon(icon, size: 30, color: Colors.blue),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -149,7 +152,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
           Switch(
             value: isActive,
             onChanged: onChanged,
-            activeColor: Colors.yellow[800],
+            activeColor: Colors.blue[800],
           ),
         ],
       ),

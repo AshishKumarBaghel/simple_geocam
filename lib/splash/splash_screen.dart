@@ -7,9 +7,10 @@ import 'package:simple_geocam/simple_geo_cam/permissions_screen.dart';
 import '../service/permission_service.dart';
 
 class SplashScreen extends StatefulWidget {
-  List<CameraDescription> cameras;
+  final List<CameraDescription> cameras;
+  final String packageVersion;
 
-  SplashScreen({super.key, required this.cameras});
+  const SplashScreen({super.key, required this.cameras, required this.packageVersion});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -63,10 +64,19 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: Colors.black12,
       body: Center(
-        child: Image.asset(
-          'assets/icon/icon_simple_geo_cam.png',
-          width: 100, // adjust size as needed
-          height: 100,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/icon/icon_app_camera.png',
+              width: 100, // adjust size as needed
+              height: 100,
+            ),
+            const SizedBox(height: 15),
+            const CircularProgressIndicator(color: Colors.white),
+            const SizedBox(height: 15),
+            Text(widget.packageVersion, style: TextStyle(color: Colors.white))
+          ],
         ),
       ),
     );

@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 
 import '../advertisement/admob_banner_ad.dart';
 import '../ui_widget/camera_button.dart';
-import '../ui_widget/icon_toggle.dart';
 import 'display_picture_screen.dart';
 
 class CameraScreen extends StatefulWidget {
@@ -89,7 +88,7 @@ class _CameraScreenState extends State<CameraScreen> {
                   width: parentWidth,
                   child: Container(
                     margin: EdgeInsets.only(left: 10, right: 10),
-                    padding: EdgeInsets.only(left: 25, right: 25, top: 13, bottom: 13),
+                    padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       color: Colors.black.withValues(alpha: 0.5),
@@ -97,15 +96,13 @@ class _CameraScreenState extends State<CameraScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Icon(Icons.settings_outlined, color: Colors.white),
-                        const Icon(Icons.flash_on_outlined, color: Colors.white),
-                        const Icon(Icons.location_off_outlined, color: Colors.white),
-                        IconToggle(
-                          icon: Icons.camera_front_outlined,
-                          onPressed: frontCameraToggleOnPressed,
-                          isActive: frontCameraToggle,
-                        ),
-                        const Icon(Icons.camera_outlined, color: Colors.white),
+                        IconButton(onPressed: () {}, icon: const Icon(Icons.settings_outlined, color: Colors.white)),
+                        IconButton(onPressed: () {}, icon: const Icon(Icons.flash_on_outlined, color: Colors.white)),
+                        IconButton(onPressed: () {}, icon: const Icon(Icons.location_off_outlined, color: Colors.white)),
+                        IconButton(
+                            onPressed: frontCameraToggleOnPressed,
+                            icon: Icon(Icons.camera_front_outlined, color: getIconButtonColor(frontCameraToggle))),
+                        IconButton(onPressed: () {}, icon: const Icon(Icons.camera_outlined, color: Colors.white)),
                       ],
                     ),
                   ),
@@ -273,5 +270,9 @@ class _CameraScreenState extends State<CameraScreen> {
     );
     initializeCamera(controller: _controller);
     setState(() {});
+  }
+
+  Color getIconButtonColor(bool isActive) {
+    return isActive ? Colors.blue : Colors.white;
   }
 }

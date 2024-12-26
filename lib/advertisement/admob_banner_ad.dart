@@ -40,9 +40,17 @@ class _AdmobBannerAdState extends State<AdmobBannerAd> {
     final bool isTablet = screenWidth >= kTabletBreakpoint;
 
     return SizedBox(
-      height: isTablet ? 150 : 70,
+      height: getAdHeight(isTablet),
       child: isBannerAdLoaded && isAdEnabled ? AdWidget(ad: bannerAd) : const SizedBox(),
     );
+  }
+
+  double getAdHeight(bool isTablet) {
+    double height = 0;
+    if (isBannerAdLoaded && isAdEnabled) {
+      height = isTablet ? 150 : 100;
+    }
+    return height;
   }
 
   @override

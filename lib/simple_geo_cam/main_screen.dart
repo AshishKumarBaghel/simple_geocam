@@ -19,6 +19,7 @@ class MainScreen extends StatelessWidget {
         useMaterial3: true,
       ),
       home: SplashScreen(cameras: cameras),
+      //home: CameraSimpleScreen(cameras: cameras),
     );
   }
 }

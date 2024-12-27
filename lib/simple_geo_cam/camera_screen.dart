@@ -2,8 +2,10 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:simple_geocam/constant/ui_theme.dart';
 import 'package:simple_geocam/service/media_enricher_service.dart';
 import 'package:simple_geocam/transport/geo_cam_transport.dart';
+import 'package:simple_geocam/ui_widget/geo_location_detail.dart';
 
 import '../advertisement/admob_banner_ad.dart';
 import '../service/geo_service.dart';
@@ -21,13 +23,18 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
+  final GeoService geoService = GeoService();
+  final MediaEnricherService mediaEnricherService = MediaEnricherService();
+  final ResolutionPreset resolutionPreset = ResolutionPreset.max;
+  final GlobalKey _geoCamContainerKey = GlobalKey();
+  final UITheme uiTheme = UITheme();
   bool frontCameraToggle = false;
-  GeoService geoService = GeoService();
-  MediaEnricherService mediaEnricherService = MediaEnricherService();
-  ResolutionPreset resolutionPreset = ResolutionPreset.high;
 
-  // 1. Create a GlobalKey
-  final GlobalKey _previewContainerKey = GlobalKey();
+  final List<bool> mediaTypeSelection = [
+    true, //index 0 camera
+    false, //index 1 video
+  ];
+  bool isCameraSelected = true;
 
   @override
   void initState() {
@@ -36,7 +43,7 @@ class _CameraScreenState extends State<CameraScreen> {
     _controller = CameraController(
       widget.cameras.first, // The camera to use
       resolutionPreset, // Resolution preset
-      enableAudio: false, // Disable audio recording
+      enableAudio: true, // Disable audio recording
     );
 
     initializeCamera(controller: _controller);
@@ -67,186 +74,152 @@ class _CameraScreenState extends State<CameraScreen> {
     GeoCamTransport geoCamTransport = geoService.fetchGeoCamDetails();
     double parentWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                // Camera Preview
-                FutureBuilder<void>(
-                  future: _initializeControllerFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      return Positioned.fill(
-                        child: FittedBox(
-                          fit: BoxFit.cover,
-                          child: SizedBox(
-                            width: _controller.value.previewSize?.height ?? 0,
-                            height: _controller.value.previewSize?.width ?? 0,
-                            child: CameraPreview(_controller),
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Column(
+          children: [
+            AdmobBannerAd(),
+            Expanded(
+              child: Stack(
+                children: [
+                  // Camera Preview
+                  FutureBuilder<void>(
+                    future: _initializeControllerFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return Positioned.fill(
+                          child: FittedBox(
+                            fit: BoxFit.cover,
+                            child: SizedBox(
+                              width: _controller.value.previewSize?.height ?? 0,
+                              height: _controller.value.previewSize?.width ?? 0,
+                              child: CameraPreview(_controller),
+                            ),
                           ),
-                        ),
-                      );
-                    } else {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                  },
-                ),
+                        );
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                    },
+                  ),
 
-                // Top Icons
-                Positioned(
-                  top: 40,
-                  width: parentWidth,
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 10, right: 10),
-                    padding: const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.black.withValues(alpha: 0.5),
+                  // Top Icons
+                  Positioned(
+                    top: 5,
+                    width: parentWidth,
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 5, right: 5),
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.black.withValues(alpha: 0.5),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(onPressed: () {}, icon: const Icon(Icons.settings_outlined, color: Colors.white)),
+                          IconButton(onPressed: () {}, icon: const Icon(Icons.flash_on_outlined, color: Colors.white)),
+                          IconButton(
+                              onPressed: frontCameraToggleOnPressed,
+                              icon: Icon(Icons.cameraswitch_outlined, color: getIconButtonColor(frontCameraToggle))),
+                        ],
+                      ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  ),
+
+                  // Bottom Section
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(onPressed: () {}, icon: const Icon(Icons.settings_outlined, color: Colors.white)),
-                        IconButton(onPressed: () {}, icon: const Icon(Icons.flash_on_outlined, color: Colors.white)),
-                        IconButton(onPressed: () {}, icon: const Icon(Icons.location_off_outlined, color: Colors.white)),
-                        IconButton(
-                            onPressed: frontCameraToggleOnPressed,
-                            icon: Icon(Icons.camera_front_outlined, color: getIconButtonColor(frontCameraToggle))),
-                        IconButton(onPressed: () {}, icon: const Icon(Icons.camera_outlined, color: Colors.white)),
+                        GeoLocationDetail(geoCamContainerKey: _geoCamContainerKey, geoCamTransport: geoCamTransport),
+                        const SizedBox(height: 2),
+                        Container(
+                          color: Colors.black,
+                          padding: const EdgeInsets.only(left: 25, right: 25, top: 13, bottom: 13),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ToggleButtons(
+                                    onPressed: (index) {
+                                      setState(() {
+                                        for (int i = 0; i < mediaTypeSelection.length; i++) {
+                                          mediaTypeSelection[i] = i == index;
+                                        }
+                                        if (index == 0) {
+                                          isCameraSelected = true;
+                                        } else {
+                                          isCameraSelected = false;
+                                        }
+                                      });
+                                    },
+                                    isSelected: mediaTypeSelection,
+                                    color: Colors.white,
+                                    children: const [
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.camera_alt,
+                                            //color: Colors.white,
+                                          ),
+                                          Text('Camera')
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.video_camera_back,
+                                            //color: Colors.white,
+                                          ),
+                                          Text('Video')
+                                        ],
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Column(
+                                    children: [
+                                      Icon(Icons.photo_library_outlined, color: Colors.white),
+                                      Text('Collection',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                          ))
+                                    ],
+                                  ),
+                                  CameraButton(
+                                    size: 64,
+                                    onPressed: cameraButtonOnPressed,
+                                    color: isCameraSelected ? uiTheme.brandColor : Colors.red,
+                                  ),
+                                  Column(
+                                    children: [
+                                      Icon(Icons.grid_view_outlined, color: uiTheme.iconColor),
+                                      Text('Template',
+                                          style: TextStyle(
+                                            color: uiTheme.textColor,
+                                          ))
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
                       ],
                     ),
                   ),
-                ),
-
-                // Bottom Section
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      RepaintBoundary(
-                        key: _previewContainerKey,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8, right: 8),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  geoCamTransport.addressTitle,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  geoCamTransport.address,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Lat ${geoCamTransport.lat}, Long ${geoCamTransport.lon}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  geoService.format.format(geoCamTransport.dateTime.toLocal()),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Note: ${geoCamTransport.note}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(20.0),
-                            topRight: Radius.circular(20.0),
-                          ),
-                        ),
-                        padding: const EdgeInsets.only(left: 25, right: 25, top: 13, bottom: 13),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Column(
-                              children: [
-                                Icon(Icons.photo_library, color: Colors.white),
-                                Text('Collection',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ))
-                              ],
-                            ),
-                            const Column(
-                              children: [
-                                Icon(Icons.map, color: Colors.white),
-                                Text('Map Data',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ))
-                              ],
-                            ),
-                            CameraButton(
-                              size: 56,
-                              onPressed: cameraButtonOnPressed,
-                            ),
-                            const Column(
-                              children: [
-                                Icon(Icons.file_present, color: Colors.white),
-                                Text('File Name',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ))
-                              ],
-                            ),
-                            const Column(
-                              children: [
-                                Icon(Icons.grid_on, color: Colors.white),
-                                Text('Template',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ))
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          AdmobBannerAd(),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -258,7 +231,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
       // Construct the path where the image should be saved
       final XFile image = await _controller.takePicture();
-      final File modifiedPng = await mediaEnricherService.captureAndSavePng(_previewContainerKey);
+      final File modifiedPng = await mediaEnricherService.captureAndSavePng(_geoCamContainerKey);
       final File modifiedImage = await mediaEnricherService.mergeImages(File(image.path), File(modifiedPng.path));
       // Navigate to the DisplayPictureScreen to display the picture
       await Navigator.of(context).push(
@@ -296,6 +269,6 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Color getIconButtonColor(bool isActive) {
-    return isActive ? Colors.blue : Colors.white;
+    return isActive ? uiTheme.iconOnColor : uiTheme.iconColor;
   }
 }

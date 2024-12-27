@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
+import '../constant/ui_theme.dart';
 import '../splash/splash_screen.dart';
 
 class MainScreen extends StatelessWidget {
@@ -16,12 +17,11 @@ class MainScreen extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Simple Geo Cam',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: UITheme().brandColor),
         useMaterial3: true,
         fontFamily: 'Roboto',
       ),
       home: SplashScreen(cameras: cameras, packageVersion: packageVersion),
-      //home: CameraSimpleScreen(cameras: cameras),
     );
   }
 }

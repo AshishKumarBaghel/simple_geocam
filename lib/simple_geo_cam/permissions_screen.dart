@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:simple_geocam/constant/ui_theme.dart';
 import 'package:simple_geocam/simple_geo_cam/camera_screen.dart';
 import 'package:simple_geocam/service/geo_cam_permission_status.dart';
 
@@ -19,9 +20,11 @@ class PermissionsScreen extends StatefulWidget {
 class _PermissionsScreenState extends State<PermissionsScreen> {
   bool isPermissionsLoading = true;
   bool isCameraAccess = false;
+  bool isMicrophoneAccess = false;
   bool isPhotoLibraryAccess = false;
   bool isLocationAccess = false;
   PermissionService permissionService = PermissionService();
+  UITheme uiTheme = UITheme();
 
   @override
   void initState() {
@@ -46,7 +49,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue[800],
+                      color: uiTheme.brandColor800,
                     ),
                   ),
                 ),
@@ -69,6 +72,12 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                     onChanged: _cameraAccessOnChanged,
                     isActive: isCameraAccess),
                 buildAccessTile(context,
+                    icon: Icons.mic,
+                    title: 'Microphone Access',
+                    subtitle: 'Microphone access is essential for high-quality video recording.',
+                    onChanged: _microphoneAccessOnChanged,
+                    isActive: isMicrophoneAccess),
+                buildAccessTile(context,
                     icon: Icons.photo,
                     title: 'Photo Library Access',
                     subtitle: 'Permission is required to access the photo library on this device.',
@@ -84,10 +93,10 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                 ),
                 Spacer(),
                 ElevatedButton(
-                  onPressed: isCameraAccess && isPhotoLibraryAccess && isLocationAccess ? nextButton : null,
+                  onPressed: isCameraAccess && isMicrophoneAccess && isPhotoLibraryAccess && isLocationAccess ? nextButton : null,
                   // Blank method
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isCameraAccess && isPhotoLibraryAccess && isLocationAccess ? Colors.blue[800] : Colors.grey,
+                    backgroundColor: isCameraAccess && isMicrophoneAccess && isPhotoLibraryAccess && isLocationAccess ? uiTheme.brandColor800 : Colors.grey,
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
@@ -98,7 +107,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: (isCameraAccess && isPhotoLibraryAccess && isLocationAccess) ? Colors.white : Colors.black),
+                        color: (isCameraAccess && isMicrophoneAccess && isPhotoLibraryAccess && isLocationAccess) ? uiTheme.textColor : Colors.black),
                   ),
                 ),
               ],
@@ -125,7 +134,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Icon(icon, size: 30, color: Colors.blue),
+          Icon(icon, size: 30, color: uiTheme.iconOnColor),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -152,7 +161,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
           Switch(
             value: isActive,
             onChanged: onChanged,
-            activeColor: Colors.blue[800],
+            activeColor: uiTheme.brandColor800,
           ),
         ],
       ),
@@ -172,6 +181,28 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
       setState(() {
         if (GeoCamPermissionStatus.isGranted == permissionStatus || GeoCamPermissionStatus.isAlreadyGranted == permissionStatus) {
           isCameraAccess = true;
+        } else {
+          SnackBarUtil().message(context: context, message: 'Application requires this permission to function properly');
+        }
+      });
+    } else {
+      // If permission is denied, prompt the user to open settings
+      SnackBarUtil().message(context: context, message: 'To revoke permission please go to system app settings');
+    }
+  }
+
+  void _microphoneAccessOnChanged(bool toggleValue) async {
+    if (toggleValue) {
+      Permission permissionMicrophone = permissionService.permissionMicrophone;
+      GeoCamPermissionStatus permissionStatus = await permissionService.requirePermission(permission: permissionMicrophone);
+      if (GeoCamPermissionStatus.isAlreadyDenied == permissionStatus) {
+        showPermissionDialog(context);
+        return;
+      }
+      // Update the state synchronously
+      setState(() {
+        if (GeoCamPermissionStatus.isGranted == permissionStatus || GeoCamPermissionStatus.isAlreadyGranted == permissionStatus) {
+          isMicrophoneAccess = true;
         } else {
           SnackBarUtil().message(context: context, message: 'Application requires this permission to function properly');
         }

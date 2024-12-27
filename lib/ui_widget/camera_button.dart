@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 
 class CameraButton extends StatefulWidget {
-  final double size;         // Size of the outer button (diameter)
-  final VoidCallback onPressed;  // Action when the button is pressed
+  final double size; // Size of the outer button (diameter)
+  final VoidCallback onPressed; // Action when the button is pressed
+  Color color;
 
-  const CameraButton({
-    Key? key,
+  CameraButton({
+    super.key,
     required this.size,
     required this.onPressed,
-  }) : super(key: key);
+    this.color = Colors.blue,
+  });
 
   @override
   _CameraButtonState createState() => _CameraButtonState();
 }
 
-class _CameraButtonState extends State<CameraButton>
-    with SingleTickerProviderStateMixin {
+class _CameraButtonState extends State<CameraButton> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _innerCircleScale;
 
@@ -43,7 +44,7 @@ class _CameraButtonState extends State<CameraButton>
   // When user lifts finger:
   void _onTapUp(TapUpDetails details) {
     _controller.reverse(); // Return to original size
-    widget.onPressed();   // Trigger the onPressed callback
+    widget.onPressed(); // Trigger the onPressed callback
   }
 
   // If the touch is canceled (e.g., user drags finger away):
@@ -60,8 +61,8 @@ class _CameraButtonState extends State<CameraButton>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: _onTapDown,   // Called when a pointer that might cause a tap has contacted the screen.
-      onTapUp: _onTapUp,       // Called when a pointer that will trigger a tap has stopped contacting the screen.
+      onTapDown: _onTapDown, // Called when a pointer that might cause a tap has contacted the screen.
+      onTapUp: _onTapUp, // Called when a pointer that will trigger a tap has stopped contacting the screen.
       onTapCancel: _onTapCancel, // Called when the gesture is canceled.
       child: AnimatedBuilder(
         animation: _controller,
@@ -70,23 +71,24 @@ class _CameraButtonState extends State<CameraButton>
           final double innerSize = widget.size * _innerCircleScale.value;
 
           return Container(
-            width: widget.size,  // Outer circle diameter
+            width: widget.size,
+            // Outer circle diameter
             height: widget.size,
-            margin: const EdgeInsets.only(left: 5, right: 5),
+            margin: const EdgeInsets.only(left: 1, right: 1),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
                 color: Colors.white, // Outer border color
-                width: 1.5,
+                width: 2.5,
               ),
               color: Colors.transparent, // Outer circle is transparent
             ),
             child: Center(
               child: Container(
-                width: innerSize,
-                height: innerSize,
-                decoration: const BoxDecoration(
-                  color: Colors.blue, // Inner circle color
+                width: innerSize * 1.05,
+                height: innerSize * 1.05,
+                decoration: BoxDecoration(
+                  color: widget.color, // Inner circle color
                   shape: BoxShape.circle,
                 ),
               ),

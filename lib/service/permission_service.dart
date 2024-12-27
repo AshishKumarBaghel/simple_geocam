@@ -5,6 +5,7 @@ import 'package:simple_geocam/service/geo_cam_permission_status.dart';
 
 class PermissionService {
   Permission permissionCamera = Permission.camera;
+  Permission permissionMicrophone = Permission.microphone;
   Permission permissionPhoto = Platform.isIOS ? Permission.photos : Permission.storage;
   Permission permissionLocation = Permission.locationWhenInUse;
 

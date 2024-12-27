@@ -24,7 +24,7 @@ class _CameraScreenState extends State<CameraScreen> {
   bool frontCameraToggle = false;
   GeoService geoService = GeoService();
   MediaEnricherService mediaEnricherService = MediaEnricherService();
-  ResolutionPreset resolutionPreset = ResolutionPreset.medium;
+  ResolutionPreset resolutionPreset = ResolutionPreset.high;
 
   // 1. Create a GlobalKey
   final GlobalKey _previewContainerKey = GlobalKey();
@@ -98,8 +98,8 @@ class _CameraScreenState extends State<CameraScreen> {
                   top: 40,
                   width: parentWidth,
                   child: Container(
-                    margin: EdgeInsets.only(left: 10, right: 10),
-                    padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                    margin: const EdgeInsets.only(left: 10, right: 10),
+                    padding: const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       color: Colors.black.withValues(alpha: 0.5),
@@ -258,17 +258,12 @@ class _CameraScreenState extends State<CameraScreen> {
 
       // Construct the path where the image should be saved
       final XFile image = await _controller.takePicture();
-      final double cameraAspectRatio = _controller.value.aspectRatio;
       final File modifiedPng = await mediaEnricherService.captureAndSavePng(_previewContainerKey);
-      debugPrint(':::>>>>>>>>>>>>>>> debug 01 camera picture ${image.path} ${modifiedPng.path}');
-      final File modifiedImage = await mediaEnricherService.mergeImages(File(image.path), modifiedPng.path);
+      final File modifiedImage = await mediaEnricherService.mergeImages(File(image.path), File(modifiedPng.path));
       // Navigate to the DisplayPictureScreen to display the picture
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => DisplayPictureScreen(
-            imagePath: modifiedImage.path,
-            widgetImagePath: modifiedPng.path,
-          ),
+          builder: (context) => DisplayPictureScreen(imagePath: modifiedImage.path),
         ),
       );
     } catch (e) {

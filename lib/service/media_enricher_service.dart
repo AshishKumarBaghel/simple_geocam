@@ -9,9 +9,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 class MediaEnricherService {
-  Uuid uuid = Uuid();
+  final Uuid uuid = Uuid();
 
-  Future<File> mergeImages(File originalFile, String overlayAssetPath) async {
+  Future<File> mergeImages(File originalFile, File overlayOriginalFile) async {
     // Load the original image
     final originalBytes = await originalFile.readAsBytes();
     final img.Image? originalImage = img.decodeImage(originalBytes);
@@ -20,11 +20,17 @@ class MediaEnricherService {
     }
 
     // Load the overlay from assets
-    final overlayBytes = await rootBundle.load(overlayAssetPath);
-    final overlayImage = img.decodeImage(overlayBytes.buffer.asUint8List());
+    final overlayBytes = await overlayOriginalFile.readAsBytes();
+    img.Image? overlayImage = img.decodeImage(overlayBytes.buffer.asUint8List());
     if (overlayImage == null) {
       throw Exception("Could not decode the overlay image.");
     }
+
+    // Scale overlay image based on original image size
+    const overlayScaleFactor = 1; // Overlay will be 20% of the original image width
+    final scaledOverlayWidth = (originalImage.width * overlayScaleFactor).toInt();
+    final scaledOverlayHeight = (overlayImage.height * (scaledOverlayWidth / overlayImage.width)).toInt();
+    overlayImage = img.copyResize(overlayImage, width: scaledOverlayWidth, height: scaledOverlayHeight);
 
     // Calculate position to place overlay at bottom center of the original image
     final xPos = (originalImage.width - overlayImage.width) ~/ 2; // Center horizontally
@@ -40,33 +46,37 @@ class MediaEnricherService {
 
     // Save the merged image
     final mergedBytes = img.encodeJpg(mergedImage);
-    final mergedFile = File('${originalFile.parent.path}/merged_output_${uuid.v4()}.jpg')..writeAsBytesSync(mergedBytes);
+    final mergedFile = File('${originalFile.parent.path}/geo_cam_merged_output_${uuid.v4()}.jpg')..writeAsBytesSync(mergedBytes);
 
     return mergedFile;
   }
 
   Future<File> captureAndSavePng(GlobalKey previewContainerKey) async {
-    // 2. Retrieve the render object of the RepaintBoundary
+    // Retrieve the RepaintBoundary render object
     RenderRepaintBoundary boundary = previewContainerKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
 
-    // 3. Convert the RepaintBoundary to an image
-    ui.Image image = await boundary.toImage(pixelRatio: 1.0);
+    // Dynamically determine the pixelRatio based on the device
+    final mediaQuery = MediaQuery.of(previewContainerKey.currentContext!);
+    double pixelRatio = mediaQuery.devicePixelRatio;
 
-    // 4. Convert the image to PNG bytes
-    final ByteData? byteData = await image.toByteData(
-      format: ui.ImageByteFormat.png,
-    );
-    final pngBytes = byteData!.buffer.asUint8List();
+    // Convert the RepaintBoundary to an image
+    ui.Image image = await boundary.toImage(pixelRatio: pixelRatio);
 
-    // 5. Get a directory to save the image (e.g., documents directory)
+    // Convert the image to PNG bytes
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData == null) {
+      throw Exception("Failed to convert the image to PNG bytes.");
+    }
+    final pngBytes = byteData.buffer.asUint8List();
+
+    // Get a directory to save the image (e.g., documents directory)
     final directory = await getApplicationDocumentsDirectory();
-    final imagePath = '${directory.path}/my_captured_widget_${uuid.v4()}.png';
+    final imagePath = '${directory.path}/geo_cam_captured_widget_${uuid.v4()}.png';
 
-    // 6. Write the PNG bytes to a file
+    // Write the PNG bytes to a file
     final file = File(imagePath);
     File resultPng = await file.writeAsBytes(pngBytes);
 
     return resultPng;
   }
-
 }

@@ -1,10 +1,12 @@
+import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:simple_geocam/service/geo_cam_service.dart';
+import 'package:simple_geocam/service/media_enricher_service.dart';
 import 'package:simple_geocam/transport/geo_cam_transport.dart';
 
 import '../advertisement/admob_banner_ad.dart';
+import '../service/geo_service.dart';
 import '../ui_widget/camera_button.dart';
 import 'display_picture_screen.dart';
 
@@ -20,7 +22,12 @@ class _CameraScreenState extends State<CameraScreen> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
   bool frontCameraToggle = false;
-  GeoCamService geoCamService = GeoCamService();
+  GeoService geoService = GeoService();
+  MediaEnricherService mediaEnricherService = MediaEnricherService();
+  ResolutionPreset resolutionPreset = ResolutionPreset.medium;
+
+  // 1. Create a GlobalKey
+  final GlobalKey _previewContainerKey = GlobalKey();
 
   @override
   void initState() {
@@ -28,7 +35,7 @@ class _CameraScreenState extends State<CameraScreen> {
     // Initialize the camera controller
     _controller = CameraController(
       widget.cameras.first, // The camera to use
-      ResolutionPreset.medium, // Resolution preset
+      resolutionPreset, // Resolution preset
       enableAudio: false, // Disable audio recording
     );
 
@@ -57,7 +64,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   Widget build(BuildContext context) {
-    GeoCamTransport geoCamTransport = geoCamService.fetchGeoCamDetails();
+    GeoCamTransport geoCamTransport = geoService.fetchGeoCamDetails();
     double parentWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Column(
@@ -118,58 +125,61 @@ class _CameraScreenState extends State<CameraScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8, right: 8),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                geoCamTransport.addressTitle,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                      RepaintBoundary(
+                        key: _previewContainerKey,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8, right: 8),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  geoCamTransport.addressTitle,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                geoCamTransport.address,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
+                                const SizedBox(height: 4),
+                                Text(
+                                  geoCamTransport.address,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Lat ${geoCamTransport.lat}, Long ${geoCamTransport.lon}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Lat ${geoCamTransport.lat}, Long ${geoCamTransport.lon}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                geoCamService.format.format(geoCamTransport.dateTime.toLocal()),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
+                                const SizedBox(height: 4),
+                                Text(
+                                  geoService.format.format(geoCamTransport.dateTime.toLocal()),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Note: ${geoCamTransport.note}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Note: ${geoCamTransport.note}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -247,12 +257,18 @@ class _CameraScreenState extends State<CameraScreen> {
       await _initializeControllerFuture;
 
       // Construct the path where the image should be saved
-      final image = await _controller.takePicture();
-
+      final XFile image = await _controller.takePicture();
+      final double cameraAspectRatio = _controller.value.aspectRatio;
+      final File modifiedPng = await mediaEnricherService.captureAndSavePng(_previewContainerKey);
+      debugPrint(':::>>>>>>>>>>>>>>> debug 01 camera picture ${image.path} ${modifiedPng.path}');
+      final File modifiedImage = await mediaEnricherService.mergeImages(File(image.path), modifiedPng.path);
       // Navigate to the DisplayPictureScreen to display the picture
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => DisplayPictureScreen(imagePath: image.path),
+          builder: (context) => DisplayPictureScreen(
+            imagePath: modifiedImage.path,
+            widgetImagePath: modifiedPng.path,
+          ),
         ),
       );
     } catch (e) {
@@ -277,7 +293,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     _controller = CameraController(
       selectedCamera, // The camera to use
-      ResolutionPreset.medium, // Resolution preset
+      resolutionPreset, // Resolution preset
       enableAudio: false, // Disable audio recording
     );
     initializeCamera(controller: _controller);

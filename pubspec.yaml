@@ -40,11 +40,12 @@ dependencies:
   geolocator: ^13.0.2
   google_maps_flutter: ^2.10.0
   google_mobile_ads: ^5.2.0
-  image: ^4.3.0
+  image: ^4.5.2
   intl: ^0.20.1
   package_info_plus: ^8.1.2
   path_provider: ^2.1.5
   permission_handler: ^11.3.1
+  uuid: ^4.5.1
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +77,9 @@ flutter:
     - assets/
     - assets/icon/icon_app_camera.png
     - assets/icon/icon_simple_geo_cam.png
+    - assets/fonts/roboto-bold.ttf
+    - assets/fonts/roboto-regular.ttf
+    - assets/fonts/roboto-regular.zip
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
@@ -101,3 +105,9 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/roboto-regular.ttf
+        - asset: assets/fonts/roboto-bold.ttf
+          weight: 700

@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:simple_geocam/transport/geo_cam_transport.dart';
 
-class GeoCamService {
+class GeoService {
   // Specify the format:
   // - MM/dd/yyyy  -> 12/26/2024
   // - hh:mm       -> 04:05   (12-hour format)

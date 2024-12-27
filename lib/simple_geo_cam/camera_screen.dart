@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:simple_geocam/constant/ui_theme.dart';
 import 'package:simple_geocam/service/media_enricher_service.dart';
+import 'package:simple_geocam/service/media_repository.dart';
+import 'package:simple_geocam/simple_geo_cam/photo_thumbnails_screen.dart';
 import 'package:simple_geocam/transport/geo_cam_transport.dart';
 import 'package:simple_geocam/ui_widget/geo_location_detail.dart';
 
@@ -25,7 +27,8 @@ class _CameraScreenState extends State<CameraScreen> {
   late Future<void> _initializeControllerFuture;
   final GeoService geoService = GeoService();
   final MediaEnricherService mediaEnricherService = MediaEnricherService();
-  final ResolutionPreset resolutionPreset = ResolutionPreset.max;
+  final MediaRepository mediaRepository = MediaRepository();
+  final ResolutionPreset resolutionPreset = ResolutionPreset.high;
   final GlobalKey _geoCamContainerKey = GlobalKey();
   final UITheme uiTheme = UITheme();
   bool frontCameraToggle = false;
@@ -120,7 +123,7 @@ class _CameraScreenState extends State<CameraScreen> {
                           IconButton(onPressed: () {}, icon: const Icon(Icons.settings_outlined, color: Colors.white)),
                           IconButton(onPressed: () {}, icon: const Icon(Icons.flash_on_outlined, color: Colors.white)),
                           IconButton(
-                              onPressed: frontCameraToggleOnPressed,
+                              onPressed: _frontCameraToggleOnPressed,
                               icon: Icon(Icons.cameraswitch_outlined, color: getIconButtonColor(frontCameraToggle))),
                         ],
                       ),
@@ -137,7 +140,7 @@ class _CameraScreenState extends State<CameraScreen> {
                         const SizedBox(height: 2),
                         Container(
                           color: Colors.black,
-                          padding: const EdgeInsets.only(left: 25, right: 25, top: 13, bottom: 13),
+                          padding: const EdgeInsets.only(left: 25, right: 25),
                           child: Column(
                             children: [
                               Row(
@@ -158,23 +161,29 @@ class _CameraScreenState extends State<CameraScreen> {
                                     },
                                     isSelected: mediaTypeSelection,
                                     color: Colors.white,
+                                    selectedColor: uiTheme.brandColor,
+                                    fillColor: Colors.yellow,
+                                    borderRadius: BorderRadius.circular(5),
+                                    constraints: BoxConstraints(
+                                      minHeight: 5, // Height of each button (decrease this value)
+                                    ),
                                     children: const [
                                       Row(
                                         children: [
                                           Icon(
-                                            Icons.camera_alt,
+                                            Icons.camera_alt_outlined,
                                             //color: Colors.white,
                                           ),
-                                          Text('Camera')
+                                          Text('Camera ', style: TextStyle(fontWeight: FontWeight.bold))
                                         ],
                                       ),
                                       Row(
                                         children: [
                                           Icon(
-                                            Icons.video_camera_back,
+                                            Icons.video_camera_back_outlined,
                                             //color: Colors.white,
                                           ),
-                                          Text('Video')
+                                          Text('Video ', style: TextStyle(fontWeight: FontWeight.bold))
                                         ],
                                       ),
                                     ],
@@ -184,13 +193,20 @@ class _CameraScreenState extends State<CameraScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Column(
+                                  Column(
                                     children: [
-                                      Icon(Icons.photo_library_outlined, color: Colors.white),
-                                      Text('Collection',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                          ))
+                                      GestureDetector(
+                                        onTap: _collectionOnTapHandler,
+                                        child: Column(
+                                          children: [
+                                            Icon(Icons.photo_library_outlined, color: uiTheme.iconColor),
+                                            Text('Collection',
+                                                style: TextStyle(
+                                                  color: uiTheme.iconColor,
+                                                )),
+                                          ],
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   CameraButton(
@@ -200,11 +216,18 @@ class _CameraScreenState extends State<CameraScreen> {
                                   ),
                                   Column(
                                     children: [
-                                      Icon(Icons.grid_view_outlined, color: uiTheme.iconColor),
-                                      Text('Template',
-                                          style: TextStyle(
-                                            color: uiTheme.textColor,
-                                          ))
+                                      GestureDetector(
+                                        onTap: () {},
+                                        child: Column(
+                                          children: [
+                                            Icon(Icons.grid_view_outlined, color: uiTheme.iconColor),
+                                            Text('Template',
+                                                style: TextStyle(
+                                                  color: uiTheme.textColor,
+                                                )),
+                                          ],
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -232,11 +255,12 @@ class _CameraScreenState extends State<CameraScreen> {
       // Construct the path where the image should be saved
       final XFile image = await _controller.takePicture();
       final File modifiedPng = await mediaEnricherService.captureAndSavePng(_geoCamContainerKey);
-      final File modifiedImage = await mediaEnricherService.mergeImages(File(image.path), File(modifiedPng.path));
+      final File modifiedFinalImage = await mediaEnricherService.mergeImages(File(image.path), File(modifiedPng.path));
+      mediaRepository.savePhoto(modifiedFinalImage.path);
       // Navigate to the DisplayPictureScreen to display the picture
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => DisplayPictureScreen(imagePath: modifiedImage.path),
+          builder: (context) => DisplayPictureScreen(imagePath: modifiedFinalImage.path),
         ),
       );
     } catch (e) {
@@ -245,7 +269,18 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  void frontCameraToggleOnPressed() {
+  void _collectionOnTapHandler() async {
+    String albumPath = await mediaRepository.getOrCreateDocumentAlbum();
+    // Navigate to the Collection to display the picture
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        //builder: (context) => AlbumScreen(albumPath: albumPath),
+        builder: (context) => const PhotoThumbnailsScreen(),
+      ),
+    );
+  }
+
+  void _frontCameraToggleOnPressed() {
     frontCameraToggle = !frontCameraToggle;
 
     var selectedCamera;

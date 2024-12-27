@@ -19,7 +19,6 @@ class MainScreen extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: UITheme().brandColor),
         useMaterial3: true,
-        fontFamily: 'Roboto',
       ),
       home: SplashScreen(cameras: cameras, packageVersion: packageVersion),
     );

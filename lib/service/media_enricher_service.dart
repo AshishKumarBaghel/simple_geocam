@@ -10,7 +10,8 @@ import 'package:uuid/uuid.dart';
 
 class MediaEnricherService {
   final Uuid uuid = Uuid();
-
+//3024 4032
+//720 1280
   Future<File> mergeImages(File originalFile, File overlayOriginalFile) async {
     // Load the original image
     final originalBytes = await originalFile.readAsBytes();
@@ -18,7 +19,6 @@ class MediaEnricherService {
     if (originalImage == null) {
       throw Exception("Could not decode the original image.");
     }
-
     // Load the overlay from assets
     final overlayBytes = await overlayOriginalFile.readAsBytes();
     img.Image? overlayImage = img.decodeImage(overlayBytes.buffer.asUint8List());

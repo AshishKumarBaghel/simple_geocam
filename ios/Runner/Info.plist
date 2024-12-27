@@ -36,6 +36,8 @@
     <string>This app requires microphone access to add on videos.</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>This app requires photo library access to show your photos.</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>We need permission to add photos to your library.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>This app requires location access to stamp photos.</string>
     <key>NSLocationAlwaysUsageDescription</key>

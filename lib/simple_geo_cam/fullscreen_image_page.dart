@@ -66,7 +66,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Image ${_currentIndex + 1} of ${widget.assets.length}'),
+        title: Text('${_currentIndex + 1} of ${widget.assets.length}'),
       ),
       body: PageView.builder(
         controller: _pageController,
@@ -87,7 +87,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
               padding: const EdgeInsets.symmetric(horizontal: 5.0),
               child: InteractiveViewer(
                 child: Container(
-                  margin: const EdgeInsets.only(top:10),
+                  margin: const EdgeInsets.only(top: 10),
                   child: Align(
                     alignment: Alignment.topCenter,
                     child: ClipRRect(

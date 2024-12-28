@@ -117,16 +117,16 @@ class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Simple Geo Cam Album'),
+        title: const Text('Select Photos'),
         actions: [
           if (_selectedAssetIds.isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.select_all),
+              icon: const Icon(Icons.select_all_outlined),
               onPressed: _selectAll,
               tooltip: 'Select All',
             ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_outlined),
             onPressed: _loadAssetsFromSpecificAlbum,
             tooltip: 'Refresh',
           ),
@@ -198,11 +198,8 @@ class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
                             onTap: () {
                               _toggleSelection(asset.id);
                             },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                //color: Colors.black45,
-                                //shape: BoxShape.circle,
-                              ),
+                            child: Transform.scale(
+                              scale: 1.2,
                               child: Checkbox(
                                 value: isSelected,
                                 onChanged: (bool? value) {
@@ -210,7 +207,7 @@ class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
                                 },
                                 activeColor: Colors.white,
                                 checkColor: Colors.blue,
-                                side: BorderSide(color: Colors.white),
+                                side: const BorderSide(color: Colors.white),
                               ),
                             ),
                           ),

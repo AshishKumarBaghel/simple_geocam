@@ -17,68 +17,113 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
   late PageController _pageController;
   late int _currentIndex;
 
+  // Image cache to store loaded images
+  final Map<int, Uint8List?> _imageCache = {};
+
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    _pageController = PageController(initialPage: _currentIndex);
-    // Preload initial and adjacent images for smoother experience
+    // Set viewportFraction to 0.99 for 1% space between pages
+    _pageController = PageController(initialPage: _currentIndex, viewportFraction: 0.9);
+    // Preload initial, two before, and two after images
     _preloadImages(_currentIndex);
-    _preloadImages(_currentIndex + 1);
-    _preloadImages(_currentIndex - 1);
+    _preloadAdjacentImages(_currentIndex);
   }
 
-  /// Preload images to enhance performance
+  /// Preload the image at the specified index and store it in the cache
   Future<void> _preloadImages(int index) async {
     if (index < 0 || index >= widget.assets.length) return;
+    if (_imageCache.containsKey(index)) return; // Already cached
 
     final asset = widget.assets[index];
-    await asset.thumbnailDataWithSize(const ThumbnailSize(200, 200));
-    await asset.originBytes;
+    try {
+      final bytes = await asset.originBytes;
+      if (mounted) {
+        setState(() {
+          _imageCache[index] = bytes;
+        });
+      }
+    } catch (e) {
+      // Handle any errors during image loading
+      if (mounted) {
+        setState(() {
+          _imageCache[index] = null;
+        });
+      }
+    }
+  }
+
+  /// Preload two images before and after the current index
+  void _preloadAdjacentImages(int index) {
+    for (int offset = -2; offset <= 2; offset++) {
+      if (offset == 0) continue; // Current image is already preloaded
+      _preloadImages(index + offset);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text('Image ${_currentIndex + 1} of ${widget.assets.length}'),
-        //backgroundColor: Colors.black,
       ),
-      body: PageView.builder(
-        controller: _pageController,
-        itemCount: widget.assets.length,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-          // Preload adjacent images
-          _preloadImages(index + 1);
-          _preloadImages(index - 1);
-        },
-        itemBuilder: (context, index) {
-          final asset = widget.assets[index];
-          return FutureBuilder<Uint8List?>(
-            // Load full-size image data
-            future: asset.originBytes,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
+      body: Column(
+        children: [
+          Center(child: Text("Sample")),
+          Expanded(
+            child: Container(
+              color: Colors.yellow,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: widget.assets.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                  // Preload two before and two after images
+                  _preloadAdjacentImages(index);
+                },
+                itemBuilder: (context, index) {
+                  final cachedImage = _imageCache[index];
 
-              return InteractiveViewer(
-                child: Center(
-                  child: Image.memory(
-                    snapshot.data!,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              );
-            },
-          );
-        },
+                  if (cachedImage != null) {
+                    // Image is cached, display it
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                      child: InteractiveViewer(
+                        child: Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10.0),
+                            child: Image.memory(
+                              cachedImage,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+
+                    /*return InteractiveViewer(
+                      child: Center(
+                        child: Image.memory(
+                          cachedImage,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    );*/
+                  } else {
+                    // Image is not cached, show a loading spinner and start loading
+                    _preloadImages(index); // Start loading the image
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -86,6 +131,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
   @override
   void dispose() {
     _pageController.dispose();
+    _imageCache.clear();
     super.dispose();
   }
 }

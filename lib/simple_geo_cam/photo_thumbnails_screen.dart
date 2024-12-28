@@ -15,6 +15,9 @@ class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
   bool _isLoading = false;
   List<AssetEntity> _assets = [];
 
+  // Add this line to track selected asset IDs
+  Set<String> _selectedAssetIds = Set<String>();
+
   @override
   void initState() {
     super.initState();
@@ -116,16 +119,22 @@ class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
       appBar: AppBar(
         title: const Text('Simple Geo Cam Album'),
         actions: [
+          if (_selectedAssetIds.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.select_all),
+              onPressed: _selectAll,
+              tooltip: 'Select All',
+            ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadAssetsFromSpecificAlbum,
             tooltip: 'Refresh',
           ),
           IconButton(
-            icon: const Icon(Icons.delete_forever_outlined),
-            onPressed: () => deleteMultipleAssets(_assets),
-            tooltip: 'Refresh',
-          ),
+              icon: const Icon(Icons.delete_forever_outlined),
+              onPressed: () => deleteSelectedAssets(),
+              tooltip: 'Delete',
+              color: _selectedAssetIds.isNotEmpty ? Colors.red : Colors.grey),
         ],
       ),
       body: _isLoading
@@ -142,49 +151,85 @@ class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
                   ),
                   itemBuilder: (context, index) {
                     final asset = _assets[index];
+                    final isSelected = _selectedAssetIds.contains(asset.id);
 
-                    // We use FutureBuilder to load the thumbnail asynchronously
-                    return FutureBuilder<Uint8List?>(
-                      future: asset.thumbnailDataWithSize(const ThumbnailSize(200, 200)),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return Container(
-                            color: Colors.grey[300],
-                          );
-                        }
-                        return GestureDetector(
-                          onTap: () {
-                            // On tap, navigate to a full-screen image viewer with swiping
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => FullScreenImagePage(
-                                  assets: _assets,
-                                  initialIndex: index,
-                                ),
+                    return Stack(
+                      children: [
+                        FutureBuilder<Uint8List?>(
+                          future: asset.thumbnailDataWithSize(const ThumbnailSize(200, 200)),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return Container(
+                                color: Colors.grey[300],
+                              );
+                            }
+                            return GestureDetector(
+                              onTap: () {
+                                if (_selectedAssetIds.isNotEmpty) {
+                                  // If in selection mode, toggle selection
+                                  _toggleSelection(asset.id);
+                                } else {
+                                  // Navigate to full-screen view
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => FullScreenImagePage(
+                                        assets: _assets,
+                                        initialIndex: index,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: Image.memory(
+                                snapshot.data!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
                               ),
                             );
                           },
-                          child: Image.memory(
-                            snapshot.data!,
-                            fit: BoxFit.cover,
+                        ),
+                        // Positioned Checkbox
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: () {
+                              _toggleSelection(asset.id);
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                //color: Colors.black45,
+                                //shape: BoxShape.circle,
+                              ),
+                              child: Checkbox(
+                                value: isSelected,
+                                onChanged: (bool? value) {
+                                  _toggleSelection(asset.id);
+                                },
+                                activeColor: Colors.white,
+                                checkColor: Colors.blue,
+                                side: BorderSide(color: Colors.white),
+                              ),
+                            ),
                           ),
-                        );
-                      },
+                        ),
+                      ],
                     );
                   },
                 ),
     );
   }
 
-  Future<void> deleteMultipleAssets(List<AssetEntity> assets) async {
+  Future<void> deleteSelectedAssets() async {
+    if (_selectedAssetIds.isEmpty) return;
+
     try {
       // This will permanently delete them from the device’s photo library
       List<String> assetIds = [];
-      for (AssetEntity assetEntity in assets) {
-        assetIds.add(assetEntity.id);
-      }
-      final result = await PhotoManager.editor.deleteWithIds(assetIds);
+      final List<String> assetIdsToDelete = _selectedAssetIds.toList();
+      final result = await PhotoManager.editor.deleteWithIds(assetIdsToDelete);
       if (result.isEmpty) {
         // If delete failed, handle appropriately
         print('Failed to delete assets');
@@ -196,5 +241,27 @@ class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
     } finally {
       _loadAssetsFromSpecificAlbum();
     }
+  }
+
+  void _toggleSelection(String assetId) {
+    setState(() {
+      if (_selectedAssetIds.contains(assetId)) {
+        _selectedAssetIds.remove(assetId);
+      } else {
+        _selectedAssetIds.add(assetId);
+      }
+    });
+  }
+
+  void _selectAll() {
+    setState(() {
+      if (_selectedAssetIds.length == _assets.length) {
+        // Deselect all
+        _selectedAssetIds.clear();
+      } else {
+        // Select all
+        _selectedAssetIds = _assets.map((asset) => asset.id).toSet();
+      }
+    });
   }
 }

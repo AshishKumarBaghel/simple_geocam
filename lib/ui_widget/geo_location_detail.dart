@@ -61,7 +61,7 @@ class GeoLocationDetail extends StatelessWidget {
                     children: [
                       // Image from assets
                       // Stretch the image to fit the container
-                      Container(
+                      SizedBox(
                         width: 90, // Adjust width
                         height: 110, // Adjust height
                         child: Image.asset(

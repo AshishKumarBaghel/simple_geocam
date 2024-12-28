@@ -24,10 +24,10 @@ class MediaRepository {
 
   Future<void> _savePhotoToAlbum(String filePath) async {
     bool? success = await GallerySaver.saveImage(filePath, albumName: 'Simple Geo Cam');
-    if (success != null && success) {
+    /*if (success != null && success) {
       print('Photo saved to Photos app in the album "Simple Geo Cam"');
     } else {
       print('Failed to save photo to Photos app');
-    }
+    }*/
   }
 }

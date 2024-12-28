@@ -1,7 +1,7 @@
-import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:simple_geocam/constant/camera_default.dart';
 import 'package:simple_geocam/constant/ui_theme.dart';
 import 'package:simple_geocam/service/media_enricher_service.dart';
 import 'package:simple_geocam/service/media_repository.dart';
@@ -32,6 +32,14 @@ class _CameraScreenState extends State<CameraScreen> {
   final GlobalKey _geoCamContainerKey = GlobalKey();
   final UITheme uiTheme = UITheme();
   bool frontCameraToggle = false;
+
+  // Flash Mode Options
+  final List<FlashMode> _flashModes = [
+    FlashMode.off,
+    FlashMode.auto,
+    FlashMode.always,
+  ];
+  int _flashModeIndex = CameraDefault().flashModeIndexDefault; // Track the current flash mode index
 
   final List<bool> mediaTypeSelection = [
     true, //index 0 camera
@@ -121,7 +129,7 @@ class _CameraScreenState extends State<CameraScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(onPressed: () {}, icon: const Icon(Icons.settings_outlined, color: Colors.white)),
-                          IconButton(onPressed: () {}, icon: const Icon(Icons.flash_on_outlined, color: Colors.white)),
+                          IconButton(onPressed: _toggleFlashMode, icon: _getFlashIcon()),
                           IconButton(
                               onPressed: _frontCameraToggleOnPressed,
                               icon: Icon(Icons.cameraswitch_outlined, color: getIconButtonColor(frontCameraToggle))),
@@ -306,5 +314,32 @@ class _CameraScreenState extends State<CameraScreen> {
 
   Color getIconButtonColor(bool isActive) {
     return isActive ? uiTheme.iconOnColor : uiTheme.iconColor;
+  }
+
+  // ----------------------------------------------------------------
+  // FLASH MODE
+  // ----------------------------------------------------------------
+  Icon _getFlashIcon({double iconSize = 24}) {
+    // Return appropriate icon based on the current flash mode
+    switch (_flashModes[_flashModeIndex]) {
+      case FlashMode.off:
+        return Icon(Icons.flash_off_outlined, color: Colors.white, size: iconSize);
+      case FlashMode.auto:
+        return Icon(Icons.flash_auto_outlined, color: uiTheme.brandColor, size: iconSize);
+      case FlashMode.always:
+        return Icon(Icons.flash_on_outlined, color: uiTheme.brandColor, size: iconSize);
+      default:
+        return Icon(Icons.flash_off, color: Colors.white, size: iconSize);
+    }
+  }
+
+  Future<void> _toggleFlashMode() async {
+    _flashModeIndex = (_flashModeIndex + 1) % _flashModes.length;
+    _changeFlashMode(_flashModes[_flashModeIndex]);
+  }
+
+  Future<void> _changeFlashMode(FlashMode flashMode) async {
+    await _controller!.setFlashMode(flashMode);
+    setState(() {});
   }
 }

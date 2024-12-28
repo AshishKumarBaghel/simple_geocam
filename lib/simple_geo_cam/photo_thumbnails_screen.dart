@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'dart:typed_data';
 
+import '../ui_widget/thumbnail_item.dart';
 import 'fullscreen_image_page.dart'; // for Uint8List
 
 class PhotoThumbnailsScreen extends StatefulWidget {
   const PhotoThumbnailsScreen({super.key});
 
   @override
-  _PhotoThumbnailsScreenState createState() => _PhotoThumbnailsScreenState();
+  PhotoThumbnailsScreenState createState() => PhotoThumbnailsScreenState();
 }
 
-class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
+class PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
   bool _isLoading = false;
   List<AssetEntity> _assets = [];
 
-  // Add this line to track selected asset IDs
+  // Track selected asset IDs
   Set<String> _selectedAssetIds = Set<String>();
 
   @override
@@ -29,22 +29,22 @@ class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
       _isLoading = true;
     });
 
-    // 1. Request permission
+    // Request permission
     final PermissionState ps = await PhotoManager.requestPermissionExtend();
     if (!ps.isAuth) {
-      // Permission denied
       setState(() {
         _isLoading = false;
       });
+      _showPermissionDeniedDialog();
       return;
     }
 
-    // 2. Fetch list of all albums (images only)
+    // Fetch list of all albums (images only)
     final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
       type: RequestType.image,
     );
 
-    // 3. Find the album named "Simple Geo Cam"
+    // Find the album named "Simple Geo Cam"
     AssetPathEntity? targetAlbum;
     for (var album in albums) {
       if (album.name == "Simple Geo Cam") {
@@ -54,7 +54,6 @@ class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
     }
 
     if (targetAlbum == null) {
-      // Album not found
       setState(() {
         _isLoading = false;
       });
@@ -62,7 +61,7 @@ class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
       return;
     }
 
-    // 4. Fetch the assets (photos) in the found album
+    // Fetch the assets (photos) in the found album
     final List<AssetEntity> fetchedAssets = await targetAlbum.getAssetListPaged(
       page: 0,
       size: 1000, // Adjust as needed
@@ -131,10 +130,11 @@ class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
             tooltip: 'Refresh',
           ),
           IconButton(
-              icon: const Icon(Icons.delete_forever_outlined),
-              onPressed: () => deleteSelectedAssets(),
-              tooltip: 'Delete',
-              color: _selectedAssetIds.isNotEmpty ? Colors.red : Colors.grey),
+            icon: const Icon(Icons.delete_forever_outlined),
+            onPressed: () => deleteSelectedAssets(),
+            tooltip: 'Delete',
+            color: _selectedAssetIds.isNotEmpty ? Colors.red : Colors.grey,
+          ),
         ],
       ),
       body: _isLoading
@@ -153,66 +153,27 @@ class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
                     final asset = _assets[index];
                     final isSelected = _selectedAssetIds.contains(asset.id);
 
-                    return Stack(
-                      children: [
-                        FutureBuilder<Uint8List?>(
-                          future: asset.thumbnailDataWithSize(const ThumbnailSize(200, 200)),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return Container(
-                                color: Colors.grey[300],
-                              );
-                            }
-                            return GestureDetector(
-                              onTap: () {
-                                if (_selectedAssetIds.isNotEmpty) {
-                                  // If in selection mode, toggle selection
-                                  _toggleSelection(asset.id);
-                                } else {
-                                  // Navigate to full-screen view
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => FullScreenImagePage(
-                                        assets: _assets,
-                                        initialIndex: index,
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                              child: Image.memory(
-                                snapshot.data!,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
-                              ),
-                            );
-                          },
-                        ),
-                        // Positioned Checkbox
-                        Positioned(
-                          top: 4,
-                          right: 4,
-                          child: GestureDetector(
-                            onTap: () {
-                              _toggleSelection(asset.id);
-                            },
-                            child: Transform.scale(
-                              scale: 1.2,
-                              child: Checkbox(
-                                value: isSelected,
-                                onChanged: (bool? value) {
-                                  _toggleSelection(asset.id);
-                                },
-                                activeColor: Colors.white,
-                                checkColor: Colors.blue,
-                                side: const BorderSide(color: Colors.white),
+                    return ThumbnailItem(
+                      asset: asset,
+                      isSelected: isSelected,
+                      onTap: () {
+                        if (_selectedAssetIds.isNotEmpty) {
+                          // If in selection mode, toggle selection
+                          _toggleSelection(asset.id);
+                        } else {
+                          // Navigate to full-screen view
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => FullScreenImagePage(
+                                assets: _assets,
+                                initialIndex: index,
                               ),
                             ),
-                          ),
-                        ),
-                      ],
+                          );
+                        }
+                      },
+                      onCheckboxTap: () => _toggleSelection(asset.id),
                     );
                   },
                 ),
@@ -224,18 +185,25 @@ class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
 
     try {
       // This will permanently delete them from the device’s photo library
-      List<String> assetIds = [];
       final List<String> assetIdsToDelete = _selectedAssetIds.toList();
       final result = await PhotoManager.editor.deleteWithIds(assetIdsToDelete);
       if (result.isEmpty) {
         // If delete failed, handle appropriately
-        print('Failed to delete assets');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to delete selected photos.')),
+        );
       } else {
-        print('Assets deleted successfully');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Selected photos deleted successfully.')),
+        );
       }
     } catch (e) {
       print('Error deleting assets: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An error occurred while deleting photos.')),
+      );
     } finally {
+      _selectedAssetIds.clear();
       _loadAssetsFromSpecificAlbum();
     }
   }
@@ -253,10 +221,8 @@ class _PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
   void _selectAll() {
     setState(() {
       if (_selectedAssetIds.length == _assets.length) {
-        // Deselect all
         _selectedAssetIds.clear();
       } else {
-        // Select all
         _selectedAssetIds = _assets.map((asset) => asset.id).toSet();
       }
     });

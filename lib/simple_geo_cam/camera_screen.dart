@@ -128,8 +128,98 @@ class _CameraScreenState extends State<CameraScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          IconButton(onPressed: () {}, icon: const Icon(Icons.settings_outlined, color: Colors.white)),
-                          IconButton(onPressed: _toggleFlashMode, icon: _getFlashIcon()),
+                          PopupMenuButton<int>(
+                            icon: const Icon(Icons.settings_outlined),
+                            iconColor: uiTheme.iconColor,
+                            itemBuilder: (context) => [
+                              // PopupMenuItem 1 Color
+                              PopupMenuItem(
+                                value: 1,
+                                // row with 2 children
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.color_lens_outlined, color: uiTheme.iconColor),
+                                    const SizedBox(width: 10),
+                                    Text("Color", style: TextStyle(color: uiTheme.textColor))
+                                  ],
+                                ),
+                              ),
+                              // PopupMenuItem 2 Position
+                              PopupMenuItem(
+                                value: 2,
+                                // row with two children
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.switch_access_shortcut_outlined, color: uiTheme.iconColor),
+                                    const SizedBox(width: 10),
+                                    Text("Position", style: TextStyle(color: uiTheme.textColor))
+                                  ],
+                                ),
+                              ),
+                              // PopupMenuItem 3 Grid
+                              PopupMenuItem(
+                                value: 3,
+                                // row with 2 children
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.grid_3x3_outlined, color: uiTheme.iconColor),
+                                    const SizedBox(width: 10),
+                                    Text("Grid", style: TextStyle(color: uiTheme.textColor))
+                                  ],
+                                ),
+                              ),
+                              // PopupMenuItem 4 Timer
+                              PopupMenuItem(
+                                value: 4,
+                                // row with 2 children
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.timer_outlined, color: uiTheme.iconColor),
+                                    const SizedBox(width: 10),
+                                    Text("Timer", style: TextStyle(color: uiTheme.textColor))
+                                  ],
+                                ),
+                              ),
+                              // PopupMenuItem 5 Ratio
+                              PopupMenuItem(
+                                value: 5,
+                                // row with 2 children
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.aspect_ratio_outlined, color: uiTheme.iconColor),
+                                    const SizedBox(width: 10),
+                                    Text("Ratio", style: TextStyle(color: uiTheme.textColor))
+                                  ],
+                                ),
+                              ),
+                              // PopupMenuItem 6 Record Video with voice
+                              PopupMenuItem(
+                                value: 6,
+                                // row with two children
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.volume_up_outlined, color: uiTheme.iconColor),
+                                    const SizedBox(width: 10),
+                                    Text("Record video with voice", style: TextStyle(color: uiTheme.textColor))
+                                  ],
+                                ),
+                              ),
+                            ],
+                            offset: Offset(0, 55),
+                            color: Colors.black.withValues(alpha: 0.5),
+                            elevation: 2,
+                            // on selected we show the dialog box
+                            onSelected: (value) {
+                              // if value 1 show dialog
+                              if (value == 1) {
+                                debugPrint('>>>>>>>>>>1');
+                                // if value 2 show dialog
+                              } else if (value == 2) {
+                                debugPrint('>>>>>>>>>>2');
+                              }
+                            },
+                          ),
+                          IconButton(onPressed: _toggleFlashModeOnPressed, icon: _getFlashIcon()),
                           IconButton(
                               onPressed: _frontCameraToggleOnPressed,
                               icon: Icon(Icons.cameraswitch_outlined, color: getIconButtonColor(frontCameraToggle))),
@@ -333,7 +423,7 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  Future<void> _toggleFlashMode() async {
+  Future<void> _toggleFlashModeOnPressed() async {
     _flashModeIndex = (_flashModeIndex + 1) % _flashModes.length;
     _changeFlashMode(_flashModes[_flashModeIndex]);
   }

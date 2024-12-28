@@ -48,7 +48,7 @@ class _AdmobBannerAdState extends State<AdmobBannerAd> {
   double getAdHeight(bool isTablet) {
     double height = 0;
     if (isBannerAdLoaded && isAdEnabled) {
-      height = isTablet ? 150 : 70;
+      height = isTablet ? 150 : 60;
     }
     return height;
   }

@@ -137,7 +137,6 @@ class _CameraScreenState extends State<CameraScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         GeoLocationDetail(geoCamContainerKey: _geoCamContainerKey, geoCamTransport: geoCamTransport),
-                        const SizedBox(height: 2),
                         Container(
                           color: Colors.black,
                           padding: const EdgeInsets.only(left: 25, right: 25),
@@ -164,7 +163,7 @@ class _CameraScreenState extends State<CameraScreen> {
                                     selectedColor: uiTheme.brandColor,
                                     fillColor: Colors.yellow,
                                     borderRadius: BorderRadius.circular(5),
-                                    constraints: BoxConstraints(
+                                    constraints: const BoxConstraints(
                                       minHeight: 5, // Height of each button (decrease this value)
                                     ),
                                     children: const [
@@ -254,20 +253,18 @@ class _CameraScreenState extends State<CameraScreen> {
 
       // Construct the path where the image should be saved
       final XFile image = await _controller.takePicture();
-      //final File modifiedPng = await mediaEnricherService.captureAndSavePng(_geoCamContainerKey);
-      //final File modifiedFinalImage = await mediaEnricherService.mergeImages(File(image.path), File(modifiedPng.path));
-      //mediaRepository.savePhoto(modifiedFinalImage.path);
-      final Uint8List modifiedPngBytes =await mediaEnricherService.captureAndSavePngBytes(_geoCamContainerKey);
+      final Uint8List modifiedPngBytes = await mediaEnricherService.captureAndSavePngBytes(_geoCamContainerKey);
       final Uint8List originalBytes = await image.readAsBytes();
       final Uint8List modifiedFinalImageBytes = await mediaEnricherService.mergeImagesBytes(originalBytes, modifiedPngBytes);
-      mediaRepository.savePhotoBytes(modifiedFinalImageBytes);
+      final tmpFinalPhoto = await mediaRepository.savePhotoBytes(modifiedFinalImageBytes);
 
+      //TODO: temporary added to show clicked picture, in production can be removed!
       // Navigate to the DisplayPictureScreen to display the picture
-      /*await Navigator.of(context).push(
+      await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => DisplayPictureScreen(imagePath: modifiedFinalImage.path),
+          builder: (context) => DisplayPictureScreen(imagePath: tmpFinalPhoto.path),
         ),
-      );*/
+      );
     } catch (e) {
       // If an error occurs, log the error
       print('Error capturing photo: $e');

@@ -254,15 +254,20 @@ class _CameraScreenState extends State<CameraScreen> {
 
       // Construct the path where the image should be saved
       final XFile image = await _controller.takePicture();
-      final File modifiedPng = await mediaEnricherService.captureAndSavePng(_geoCamContainerKey);
-      final File modifiedFinalImage = await mediaEnricherService.mergeImages(File(image.path), File(modifiedPng.path));
-      mediaRepository.savePhoto(modifiedFinalImage.path);
+      //final File modifiedPng = await mediaEnricherService.captureAndSavePng(_geoCamContainerKey);
+      //final File modifiedFinalImage = await mediaEnricherService.mergeImages(File(image.path), File(modifiedPng.path));
+      //mediaRepository.savePhoto(modifiedFinalImage.path);
+      final Uint8List modifiedPngBytes =await mediaEnricherService.captureAndSavePngBytes(_geoCamContainerKey);
+      final Uint8List originalBytes = await image.readAsBytes();
+      final Uint8List modifiedFinalImageBytes = await mediaEnricherService.mergeImagesBytes(originalBytes, modifiedPngBytes);
+      mediaRepository.savePhotoBytes(modifiedFinalImageBytes);
+
       // Navigate to the DisplayPictureScreen to display the picture
-      await Navigator.of(context).push(
+      /*await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => DisplayPictureScreen(imagePath: modifiedFinalImage.path),
         ),
-      );
+      );*/
     } catch (e) {
       // If an error occurs, log the error
       print('Error capturing photo: $e');
@@ -270,7 +275,6 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   void _collectionOnTapHandler() async {
-    String albumPath = await mediaRepository.getOrCreateDocumentAlbum();
     // Navigate to the Collection to display the picture
     await Navigator.of(context).push(
       MaterialPageRoute(

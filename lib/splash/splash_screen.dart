@@ -85,9 +85,10 @@ class _SplashScreenState extends State<SplashScreen> {
 // Load the boolean from shared prefs
   Future<bool> _loadAllNecessaryPermissions() async {
     bool isCameraAccess = await permissionService.permissionCamera.status.isGranted;
+    bool isMicrophoneAccess = await permissionService.permissionMicrophone.status.isGranted;
     bool isPhotoLibraryAccess = await permissionService.permissionPhoto.status.isGranted;
     bool isLocationAccess = await permissionService.permissionLocation.status.isGranted;
-    _isAllPermissions = isCameraAccess && isPhotoLibraryAccess && isLocationAccess;
+    _isAllPermissions = isCameraAccess && isMicrophoneAccess && isPhotoLibraryAccess && isLocationAccess;
     return _isAllPermissions;
   }
 }

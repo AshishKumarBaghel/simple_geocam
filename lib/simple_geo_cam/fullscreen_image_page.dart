@@ -68,62 +68,56 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
       appBar: AppBar(
         title: Text('Image ${_currentIndex + 1} of ${widget.assets.length}'),
       ),
-      body: Column(
-        children: [
-          Center(child: Text("Sample")),
-          Expanded(
-            child: Container(
-              color: Colors.yellow,
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: widget.assets.length,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                  // Preload two before and two after images
-                  _preloadAdjacentImages(index);
-                },
-                itemBuilder: (context, index) {
-                  final cachedImage = _imageCache[index];
+      body: PageView.builder(
+        controller: _pageController,
+        itemCount: widget.assets.length,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+          // Preload two before and two after images
+          _preloadAdjacentImages(index);
+        },
+        itemBuilder: (context, index) {
+          final cachedImage = _imageCache[index];
 
-                  if (cachedImage != null) {
-                    // Image is cached, display it
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                      child: InteractiveViewer(
-                        child: Center(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10.0),
-                            child: Image.memory(
-                              cachedImage,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
+          if (cachedImage != null) {
+            // Image is cached, display it
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              child: InteractiveViewer(
+                child: Container(
+                  margin: const EdgeInsets.only(top:10),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10.0),
+                      child: Image.memory(
+                        cachedImage,
+                        fit: BoxFit.contain,
                       ),
-                    );
-
-                    /*return InteractiveViewer(
-                      child: Center(
-                        child: Image.memory(
-                          cachedImage,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    );*/
-                  } else {
-                    // Image is not cached, show a loading spinner and start loading
-                    _preloadImages(index); // Start loading the image
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                },
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-        ],
+            );
+
+            /*return InteractiveViewer(
+              child: Center(
+                child: Image.memory(
+                  cachedImage,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            );*/
+          } else {
+            // Image is not cached, show a loading spinner and start loading
+            _preloadImages(index); // Start loading the image
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
       ),
     );
   }

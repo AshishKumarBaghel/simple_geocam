@@ -1,4 +1,4 @@
 class CameraDefault {
   bool isCameraSelectedDefault = true;
-  int flashModeIndexDefault = 0;
+  int flashModeIndexDefault = 1;
 }

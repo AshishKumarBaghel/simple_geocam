@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:simple_geocam/transport/geo_cam_transport.dart';
 
@@ -16,10 +17,15 @@ class GeoService {
       address: 'Mahananda Nagar, Ujjain - 456010, Madhya Pradesh, India',
       lat: '23.1500',
       lon: '75.802633',
-      dateTime: DateTime(2024, 12, 26, 18, 41, 22, 09, 9),
+      dateTime: _getCurrentDateTime(),
       note: 'Captured by Simple Geo Cam',
     );
 
     return geoCamTransport;
+  }
+
+  DateTime _getCurrentDateTime() {
+    DateTime utcDateTime = DateTime.now().toUtc();
+    return utcDateTime;
   }
 }

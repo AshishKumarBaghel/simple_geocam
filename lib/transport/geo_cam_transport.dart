@@ -1,41 +1,28 @@
+import 'package:simple_geocam/transport/geo_cam_address_transport.dart';
+import 'package:simple_geocam/transport/geo_cam_weather_transport.dart';
+
 class GeoCamTransport {
-  final String addressTitle;
-  final String address;
-  final String lat;
-  final String lon;
-  final DateTime dateTime;
-  final String note;
+  final GeoCamAddressTransport address;
+  final GeoCamWeatherTransport weather;
 
   GeoCamTransport({
-    required this.addressTitle,
     required this.address,
-    required this.lat,
-    required this.lon,
-    required this.dateTime,
-    required this.note,
+    required this.weather,
   });
 
   // Factory constructor to create an instance from JSON
   factory GeoCamTransport.fromJson(Map<String, dynamic> json) {
     return GeoCamTransport(
-      addressTitle: json['addressTitle'] as String,
-      address: json['address'] as String,
-      lat: json['lat'] as String,
-      lon: json['lon'] as String,
-      dateTime: json['dateTime'] as DateTime,
-      note: json['note'] as String,
+      address: json['address'] as GeoCamAddressTransport,
+      weather: json['weather'] as GeoCamWeatherTransport,
     );
   }
 
   // Optional: Convert an instance back to JSON
   Map<String, dynamic> toJson() {
     return {
-      'addressTitle': addressTitle,
       'address': address,
-      'lat': lat,
-      'lon': lon,
-      'dateTime': dateTime,
-      'note': note,
+      'weather': weather,
     };
   }
 }

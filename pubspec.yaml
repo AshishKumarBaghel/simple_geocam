@@ -80,6 +80,12 @@ flutter:
     - assets/
     - assets/icon/icon_app_camera.png
     - assets/icon/icon_simple_geo_cam.png
+    - assets/icon/icon_cloudy.png
+    - assets/icon/icon_compass.png
+    - assets/icon/icon_humidity.png
+    - assets/icon/icon_magnet.png
+    - assets/icon/icon_mountain.png
+    - assets/icon/icon_wind.png
     - assets/map/map_location.jpg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

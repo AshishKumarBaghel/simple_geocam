@@ -28,7 +28,7 @@ class _CameraScreenState extends State<CameraScreen> {
   final GeoService geoService = GeoService();
   final MediaEnricherService mediaEnricherService = MediaEnricherService();
   final MediaRepository mediaRepository = MediaRepository();
-  final ResolutionPreset resolutionPreset = ResolutionPreset.high;
+  final ResolutionPreset resolutionPreset = ResolutionPreset.ultraHigh;
   final GlobalKey _geoCamContainerKey = GlobalKey();
   final UITheme uiTheme = UITheme();
   bool frontCameraToggle = false;
@@ -84,6 +84,7 @@ class _CameraScreenState extends State<CameraScreen> {
   Widget build(BuildContext context) {
     GeoCamTransport geoCamTransport = geoService.fetchGeoCamDetails();
     double parentWidth = MediaQuery.of(context).size.width;
+    Color backgroundColor = Colors.black.withValues(alpha: 0.5);
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -123,7 +124,7 @@ class _CameraScreenState extends State<CameraScreen> {
                       padding: const EdgeInsets.only(left: 10, right: 10),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        color: Colors.black.withValues(alpha: 0.5),
+                        color: backgroundColor,
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -206,7 +207,7 @@ class _CameraScreenState extends State<CameraScreen> {
                               ),
                             ],
                             offset: Offset(0, 55),
-                            color: Colors.black.withValues(alpha: 0.5),
+                            color: backgroundColor,
                             elevation: 2,
                             // on selected we show the dialog box
                             onSelected: (value) {

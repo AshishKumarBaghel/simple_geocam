@@ -186,7 +186,9 @@ class PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
     try {
       // This will permanently delete them from the device’s photo library
       final List<String> assetIdsToDelete = _selectedAssetIds.toList();
+      debugPrint('>>>>>>>>>>debhugh 01');
       final result = await PhotoManager.editor.deleteWithIds(assetIdsToDelete);
+      debugPrint('>>>>>>>>>>debhugh 02 $result');
       if (result.isEmpty) {
         // If delete failed, handle appropriately
         ScaffoldMessenger.of(context).showSnackBar(

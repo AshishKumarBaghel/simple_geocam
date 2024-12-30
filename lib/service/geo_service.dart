@@ -1,6 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'package:simple_geocam/transport/geo_cam_address_transport.dart';
 import 'package:simple_geocam/transport/geo_cam_transport.dart';
+
+import '../transport/geo_cam_weather_transport.dart';
 
 class GeoService {
   // Specify the format:
@@ -12,19 +14,27 @@ class GeoService {
   final format = DateFormat("MM/dd/yyyy hh:mm a 'GMT' +05:30");
 
   GeoCamTransport fetchGeoCamDetails() {
-    GeoCamTransport geoCamTransport = GeoCamTransport(
+    GeoCamAddressTransport geoCamAddressTransport = GeoCamAddressTransport(
       addressTitle: 'Ujjain Madhya Pradesh, India',
       address: 'Mahananda Nagar, Ujjain - 456010, Madhya Pradesh, India',
       lat: '23.1500',
       lon: '75.802633',
-      dateTime: _getCurrentDateTime(),
-      note: 'Captured by Simple Geo Cam',
+      dateTime: getCurrentDateTime(),
     );
 
-    return geoCamTransport;
+    GeoCamWeatherTransport geoCamWeatherTransport = GeoCamWeatherTransport(
+      temperature: '76 °F',
+      wind: '8.0 mph',
+      altitude: '1636 ft',
+      compass: '225° SW',
+      humidity: '77%',
+      magneticField: '50 uT',
+    );
+
+    return GeoCamTransport(address: geoCamAddressTransport, weather: geoCamWeatherTransport);
   }
 
-  DateTime _getCurrentDateTime() {
+  DateTime getCurrentDateTime() {
     DateTime utcDateTime = DateTime.now().toUtc();
     return utcDateTime;
   }

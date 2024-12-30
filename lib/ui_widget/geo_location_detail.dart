@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:simple_geocam/service/geo_service.dart';
+import 'package:simple_geocam/transport/geo_cam_address_transport.dart';
+import 'package:simple_geocam/transport/geo_cam_weather_transport.dart';
 
 import '../transport/geo_cam_transport.dart';
 
@@ -7,11 +9,15 @@ class GeoLocationDetail extends StatelessWidget {
   final GeoCamTransport geoCamTransport;
   final GlobalKey geoCamContainerKey;
   final GeoService geoService = GeoService();
+  final double iconSize = 20;
 
   GeoLocationDetail({super.key, required this.geoCamContainerKey, required this.geoCamTransport});
 
   @override
   Widget build(BuildContext context) {
+    final GeoCamAddressTransport geoCamAddress = geoCamTransport.address;
+    final GeoCamWeatherTransport geoCamWeather = geoCamTransport.weather;
+    Color backgroundColor = Colors.black.withValues(alpha: 0.5);
     return RepaintBoundary(
       key: geoCamContainerKey,
       child: Padding(
@@ -24,7 +30,7 @@ class GeoLocationDetail extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: backgroundColor,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(8),
                       topRight: Radius.circular(8),
@@ -51,7 +57,7 @@ class GeoLocationDetail extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.5),
+                color: backgroundColor,
                 borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(12), bottomRight: Radius.circular(12), bottomLeft: Radius.circular(12)),
               ),
@@ -63,7 +69,7 @@ class GeoLocationDetail extends StatelessWidget {
                       // Stretch the image to fit the container
                       SizedBox(
                         width: 90, // Adjust width
-                        height: 110, // Adjust height
+                        height: 145, // Adjust height
                         child: Image.asset(
                           'assets/map/map_location.jpg', // Replace with your asset path
                           fit: BoxFit.fill, // Stretches the image
@@ -75,7 +81,7 @@ class GeoLocationDetail extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              geoCamTransport.addressTitle,
+                              geoCamAddress.addressTitle,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
@@ -84,7 +90,7 @@ class GeoLocationDetail extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              geoCamTransport.address,
+                              geoCamAddress.address,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
@@ -92,18 +98,104 @@ class GeoLocationDetail extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Lat ${geoCamTransport.lat}, Long ${geoCamTransport.lon}',
+                              'Lat ${geoCamAddress.lat}, Long ${geoCamAddress.lon}',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(geoService.format.format(geoCamTransport.dateTime),
+                            Text(geoService.format.format(geoCamAddress.dateTime),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
                                 )),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Image.asset(
+                                          'assets/icon/icon_cloudy.png',
+                                          width: iconSize, // adjust size as needed
+                                          height: iconSize,
+                                        ),
+                                        Text(geoCamWeather.temperature, style: const TextStyle(color: Colors.white)),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Image.asset(
+                                          'assets/icon/icon_wind.png',
+                                          width: iconSize, // adjust size as needed
+                                          height: iconSize,
+                                        ),
+                                        Text(geoCamWeather.wind, style: const TextStyle(color: Colors.white)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Image.asset(
+                                          'assets/icon/icon_compass.png',
+                                          width: iconSize, // adjust size as needed
+                                          height: iconSize,
+                                        ),
+                                        Text(geoCamWeather.compass, style: const TextStyle(color: Colors.white)),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Image.asset(
+                                          'assets/icon/icon_humidity.png',
+                                          width: iconSize, // adjust size as needed
+                                          height: iconSize,
+                                        ),
+                                        Text(geoCamWeather.humidity, style: const TextStyle(color: Colors.white)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Image.asset(
+                                          'assets/icon/icon_mountain.png',
+                                          width: iconSize, // adjust size as needed
+                                          height: iconSize,
+                                        ),
+                                        Text(geoCamWeather.altitude, style: const TextStyle(color: Colors.white)),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Image.asset(
+                                          'assets/icon/icon_magnet.png',
+                                          width: iconSize, // adjust size as needed
+                                          height: iconSize,
+                                        ),
+                                        Text(geoCamWeather.magneticField, style: const TextStyle(color: Colors.white)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )
                           ],
                         ),
                       ),

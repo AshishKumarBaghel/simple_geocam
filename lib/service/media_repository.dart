@@ -3,10 +3,12 @@ import 'dart:typed_data';
 
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:simple_geocam/service/geo_cam_file_metadata.dart';
 import 'package:uuid/uuid.dart';
 
 class MediaRepository {
-  Uuid uuid = Uuid();
+  final Uuid uuid = Uuid();
+  final GeoCamFileMetadata fileMetadataService = GeoCamFileMetadata();
 
   Future<File> savePhotoBytes(Uint8List bytes) async {
     // Get the temporary directory of the device.
@@ -14,7 +16,8 @@ class MediaRepository {
     final String tempPath = tempDir.path;
 
     // Define the file path and name.
-    final File tmpFinalPhoto = File('$tempPath/geo_cam_merged_output_${uuid.v4()}.jpg');
+    final String finalFileName = await fileMetadataService.getImageName();
+    final File tmpFinalPhoto = File('$tempPath/$finalFileName.jpg');
 
     // Write the bytes to the file.
     await tmpFinalPhoto.writeAsBytes(bytes);
@@ -23,11 +26,6 @@ class MediaRepository {
   }
 
   Future<void> _savePhotoToAlbum(String filePath) async {
-    bool? success = await GallerySaver.saveImage(filePath, albumName: 'Simple Geo Cam');
-    /*if (success != null && success) {
-      print('Photo saved to Photos app in the album "Simple Geo Cam"');
-    } else {
-      print('Failed to save photo to Photos app');
-    }*/
+    await GallerySaver.saveImage(filePath, albumName: 'Simple Geo Cam');
   }
 }

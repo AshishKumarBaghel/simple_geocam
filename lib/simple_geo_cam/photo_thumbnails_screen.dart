@@ -191,22 +191,26 @@ class PhotoThumbnailsScreenState extends State<PhotoThumbnailsScreen> {
       debugPrint('>>>>>>>>>>debhugh 02 $result');
       if (result.isEmpty) {
         // If delete failed, handle appropriately
-        ScaffoldMessenger.of(context).showSnackBar(
+        /*ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to delete selected photos.')),
-        );
+        );*/
+        debugPrint('Failed to delete selected photos.');
+
+        return;
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Selected photos deleted successfully.')),
         );
+        _loadAssetsFromSpecificAlbum();
       }
     } catch (e) {
-      print('Error deleting assets: $e');
+      debugPrint('Error deleting assets: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('An error occurred while deleting photos.')),
       );
     } finally {
       _selectedAssetIds.clear();
-      _loadAssetsFromSpecificAlbum();
+      setState(() {});
     }
   }
 

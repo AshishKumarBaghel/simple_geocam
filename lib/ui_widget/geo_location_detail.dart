@@ -26,42 +26,46 @@ class GeoLocationDetail extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4, right: 4, bottom: 4),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: backgroundColor,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    topRight: Radius.circular(8),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Container(
-                      width: 20, // Adjust width
-                      height: 20, // Adjust height
-                      child: Image.asset(
-                        'assets/icon/icon_app_camera.png', // Replace with your asset path
-                        fit: BoxFit.fill, // Stretches the image
-                      ),
+          if (templateTransport.templateMap.appStamp)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      topRight: Radius.circular(8),
                     ),
-                    SizedBox(width: 5),
-                    Text('Simple Geo Cam', style: TextStyle(color: Colors.white)),
-                  ],
-                ),
-              )
-            ],
-          ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        width: 20, // Adjust width
+                        height: 20, // Adjust height
+                        child: Image.asset(
+                          'assets/icon/icon_app_camera.png', // Replace with your asset path
+                          fit: BoxFit.fill, // Stretches the image
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Text('Simple Geo Cam', style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
+                )
+              ],
+            ),
           Container(
             padding: const EdgeInsets.all(5),
             decoration: BoxDecoration(
               color: backgroundColor,
-              borderRadius:
-                  const BorderRadius.only(topLeft: Radius.circular(12), bottomRight: Radius.circular(12), bottomLeft: Radius.circular(12)),
+              borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(12),
+                  bottomRight: const Radius.circular(12),
+                  bottomLeft: const Radius.circular(12),
+                  topRight: (!templateTransport.templateMap.appStamp) ? const Radius.circular(12) : const Radius.circular(0)),
             ),
             child: Column(
               children: [

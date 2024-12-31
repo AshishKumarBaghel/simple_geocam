@@ -6,12 +6,14 @@ class TemplateMapTransport {
   final MapType mapType;
   final MapPosition mapPosition;
   final int scale;
+  final bool appStamp;
 
   TemplateMapTransport({
     required this.hasMapImage,
     required this.mapType,
     required this.mapPosition,
     required this.scale,
+    required this.appStamp,
   });
 
   // Factory constructor to create an instance from JSON
@@ -21,6 +23,7 @@ class TemplateMapTransport {
       mapType: json['mapType'] as MapType,
       mapPosition: json['mapPosition'] as MapPosition,
       scale: json['scale'] as int,
+      appStamp: json['appStamp'] as bool,
     );
   }
 
@@ -31,6 +34,7 @@ class TemplateMapTransport {
       'mapType': mapType,
       'mapPosition': mapPosition,
       'scale': scale,
+      'appStamp': appStamp,
     };
   }
 }

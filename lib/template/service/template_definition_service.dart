@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:simple_geocam/template/template_preference_service.dart';
 import 'package:simple_geocam/template/transport/template_address_transport.dart';
 import 'package:simple_geocam/template/transport/template_map_transport.dart';
 import 'package:simple_geocam/template/transport/template_transport.dart';
@@ -12,12 +14,31 @@ import '../transport/value/map_type.dart';
 import '../transport/value/wind_type.dart';
 
 class TemplateDefinitionService {
+  final TemplatePreferenceService _templatePreferenceService = TemplatePreferenceService();
+
+  TemplateTransport getUserSavedTemplate() {
+    final String templateKey = _templatePreferenceService.fetchTemplate();
+    if ('extreme' == templateKey) {
+      return getExtremeTemplate();
+    } else if ('classic' == templateKey) {
+      return getClassicTemplate();
+    } else if ('advance' == templateKey) {
+      return getAdvanceTemplate();
+    } else if ('hard' == templateKey) {
+      return getHardTemplate();
+    } else if ('simple' == templateKey) {
+      return getSimpleTemplate();
+    }
+    return getAdvanceTemplate();
+  }
+
   TemplateTransport getExtremeTemplate() {
     final TemplateMapTransport templateMap = TemplateMapTransport(
       hasMapImage: true,
       mapType: MapType.satellite,
       mapPosition: MapPosition.left,
       scale: 15,
+      appStamp: true,
     );
 
     final TemplateAddressTransport templateAddress = TemplateAddressTransport(
@@ -52,6 +73,7 @@ class TemplateDefinitionService {
       mapType: MapType.satellite,
       mapPosition: MapPosition.left,
       scale: 15,
+      appStamp: true,
     );
     final TemplateAddressTransport templateAddress = TemplateAddressTransport(
         hasAddressTitle: true,
@@ -82,6 +104,7 @@ class TemplateDefinitionService {
       mapType: MapType.satellite,
       mapPosition: MapPosition.left,
       scale: 15,
+      appStamp: true,
     );
 
     final TemplateAddressTransport templateAddress = TemplateAddressTransport(
@@ -114,6 +137,7 @@ class TemplateDefinitionService {
       mapType: MapType.satellite,
       mapPosition: MapPosition.left,
       scale: 15,
+      appStamp: true,
     );
 
     final TemplateAddressTransport templateAddress = TemplateAddressTransport(
@@ -148,6 +172,7 @@ class TemplateDefinitionService {
       mapType: MapType.satellite,
       mapPosition: MapPosition.left,
       scale: 15,
+      appStamp: false,
     );
 
     final TemplateAddressTransport templateAddress = TemplateAddressTransport(

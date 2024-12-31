@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 class CameraButton extends StatefulWidget {
   final double size; // Size of the outer button (diameter)
   final VoidCallback onPressed; // Action when the button is pressed
-  Color color;
+  final Color color;
 
-  CameraButton({
+  const CameraButton({
     super.key,
     required this.size,
     required this.onPressed,

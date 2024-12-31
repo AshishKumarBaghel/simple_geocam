@@ -89,7 +89,7 @@ class _CameraScreenState extends State<CameraScreen> {
     GeoCamTransport geoCamTransport = geoService.fetchGeoCamDetails();
     double parentWidth = MediaQuery.of(context).size.width;
     Color backgroundColor = Colors.black.withValues(alpha: 0.5);
-    TemplateTransport currentTemplateTransport = templateDefinitionService.getExtremeTemplate();
+    TemplateTransport currentTemplateTransport = templateDefinitionService.getUserSavedTemplate();
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -399,6 +399,7 @@ class _CameraScreenState extends State<CameraScreen> {
         builder: (context) => const TemplateScreen(),
       ),
     );
+    setState(() {});
   }
 
   void _frontCameraToggleOnPressed() {
@@ -451,7 +452,7 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _changeFlashMode(FlashMode flashMode) async {
-    await _controller!.setFlashMode(flashMode);
+    await _controller.setFlashMode(flashMode);
     setState(() {});
   }
 }

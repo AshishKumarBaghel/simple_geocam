@@ -48,6 +48,7 @@ dependencies:
   path_provider: ^2.1.5
   permission_handler: ^11.3.1
   photo_manager: ^3.6.3 #thumbnail and collection of images in app
+  shared_preferences: ^2.3.4
   uuid: ^4.5.1
 
 dev_dependencies:

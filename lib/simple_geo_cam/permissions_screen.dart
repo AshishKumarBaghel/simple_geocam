@@ -39,84 +39,82 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  Center(
-                    child: Text(
-                      'We need some access!',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: uiTheme.brandColor800,
-                      ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                Center(
+                  child: Text(
+                    'We need some access!',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: uiTheme.brandColor800,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: Text(
-                      'You need to grant access to the device camera, microphone and photo library to take photos or record video',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
+                ),
+                const SizedBox(height: 20),
+                Center(
+                  child: Text(
+                    'You need to grant access to the device camera, microphone and photo library to take photos or record video',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                buildAccessTile(context,
+                    icon: Icons.camera_alt,
+                    title: 'Camera Access',
+                    subtitle: 'Access is necessary to capture photos & Videos for stamping.',
+                    onChanged: _cameraAccessOnChanged,
+                    isActive: isCameraAccess),
+                buildAccessTile(context,
+                    icon: Icons.mic,
+                    title: 'Microphone Access',
+                    subtitle: 'Microphone access is essential for high-quality video recording.',
+                    onChanged: _microphoneAccessOnChanged,
+                    isActive: isMicrophoneAccess),
+                buildAccessTile(context,
+                    icon: Icons.photo,
+                    title: 'Photo Library Access',
+                    subtitle: 'Permission is required to access the photo library on this device.',
+                    onChanged: _photoLibraryOnChanged,
+                    isActive: isPhotoLibraryAccess),
+                buildAccessTile(
+                  context,
+                  icon: Icons.location_on,
+                  title: 'Location Access',
+                  subtitle: 'For the accurate location, this app requires permission.',
+                  onChanged: _locationAccessOnChanged,
+                  isActive: isLocationAccess,
+                ),
+                Spacer(),
+                ElevatedButton(
+                  onPressed: isCameraAccess && isMicrophoneAccess && isPhotoLibraryAccess && isLocationAccess ? nextButton : null,
+                  // Blank method
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isCameraAccess && isMicrophoneAccess && isPhotoLibraryAccess && isLocationAccess
+                        ? uiTheme.brandColor800
+                        : Colors.grey,
+                    minimumSize: const Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  child: Text(
+                    'Next',
+                    style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
-                    ),
+                        fontWeight: FontWeight.bold,
+                        color: (isCameraAccess && isMicrophoneAccess && isPhotoLibraryAccess && isLocationAccess)
+                            ? uiTheme.textColor
+                            : Colors.black),
                   ),
-                  const SizedBox(height: 30),
-                  buildAccessTile(context,
-                      icon: Icons.camera_alt,
-                      title: 'Camera Access',
-                      subtitle: 'Access is necessary to capture photos & Videos for stamping.',
-                      onChanged: _cameraAccessOnChanged,
-                      isActive: isCameraAccess),
-                  buildAccessTile(context,
-                      icon: Icons.mic,
-                      title: 'Microphone Access',
-                      subtitle: 'Microphone access is essential for high-quality video recording.',
-                      onChanged: _microphoneAccessOnChanged,
-                      isActive: isMicrophoneAccess),
-                  buildAccessTile(context,
-                      icon: Icons.photo,
-                      title: 'Photo Library Access',
-                      subtitle: 'Permission is required to access the photo library on this device.',
-                      onChanged: _photoLibraryOnChanged,
-                      isActive: isPhotoLibraryAccess),
-                  buildAccessTile(
-                    context,
-                    icon: Icons.location_on,
-                    title: 'Location Access',
-                    subtitle: 'For the accurate location, this app requires permission.',
-                    onChanged: _locationAccessOnChanged,
-                    isActive: isLocationAccess,
-                  ),
-                  Spacer(),
-                  ElevatedButton(
-                    onPressed: isCameraAccess && isMicrophoneAccess && isPhotoLibraryAccess && isLocationAccess ? nextButton : null,
-                    // Blank method
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isCameraAccess && isMicrophoneAccess && isPhotoLibraryAccess && isLocationAccess
-                          ? uiTheme.brandColor800
-                          : Colors.grey,
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    child: Text(
-                      'Next',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: (isCameraAccess && isMicrophoneAccess && isPhotoLibraryAccess && isLocationAccess)
-                              ? uiTheme.textColor
-                              : Colors.black),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

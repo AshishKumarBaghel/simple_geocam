@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:simple_geocam/template/template_preference_service.dart';
 import 'package:simple_geocam/template/transport/template_address_transport.dart';
 import 'package:simple_geocam/template/transport/template_map_transport.dart';
@@ -10,6 +9,7 @@ import 'package:simple_geocam/template/transport/value/lat_long_type.dart';
 import 'package:simple_geocam/template/transport/value/map_position.dart';
 import 'package:simple_geocam/template/transport/value/temperature_type.dart';
 
+import '../transport/template.dart';
 import '../transport/value/map_type.dart';
 import '../transport/value/wind_type.dart';
 
@@ -18,24 +18,7 @@ class TemplateDefinitionService {
 
   TemplateTransport getUserSavedTemplate() {
     final String templateKey = _templatePreferenceService.fetchTemplate();
-    if ('extreme' == templateKey) {
-      return getExtremeTemplate();
-    } else if ('classic' == templateKey) {
-      return getClassicTemplate();
-    } else if ('advance' == templateKey) {
-      return getAdvanceTemplate();
-    } else if ('hard' == templateKey) {
-      return getHardTemplate();
-    } else if ('simple' == templateKey) {
-      return getSimpleTemplate();
-    } else if ('template 01' == templateKey) {
-      //TODO: 31.12.24 it should be fetched from database/preference
-      return getSimpleTemplate();
-    } else if ('template 02' == templateKey) {
-      //TODO: 31.12.24 it should be fetched from database/preference
-      return getClassicTemplate();
-    }
-    return getAdvanceTemplate();
+    return Template.getTransportByTitle(templateKey);
   }
 
   TemplateTransport getExtremeTemplate() {
@@ -202,4 +185,15 @@ class TemplateDefinitionService {
       templateWeather: templateWeather,
     );
   }
+
+  TemplateTransport getUserTemplate01(){
+    //TODO: implement with proper logic
+    return getSimpleTemplate();
+  }
+
+  TemplateTransport getUserTemplate02(){
+    //TODO: implement with proper logic
+    return getAdvanceTemplate();
+  }
+
 }

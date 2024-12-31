@@ -6,6 +6,9 @@ import 'package:simple_geocam/constant/ui_theme.dart';
 import 'package:simple_geocam/service/media_enricher_service.dart';
 import 'package:simple_geocam/service/media_repository.dart';
 import 'package:simple_geocam/simple_geo_cam/photo_thumbnails_screen.dart';
+import 'package:simple_geocam/template/service/template_definition_service.dart';
+import 'package:simple_geocam/template/template_screen.dart';
+import 'package:simple_geocam/template/transport/template_transport.dart';
 import 'package:simple_geocam/transport/geo_cam_transport.dart';
 import 'package:simple_geocam/ui_widget/geo_location_detail.dart';
 
@@ -31,6 +34,7 @@ class _CameraScreenState extends State<CameraScreen> {
   final ResolutionPreset resolutionPreset = ResolutionPreset.ultraHigh;
   final GlobalKey _geoCamContainerKey = GlobalKey();
   final UITheme uiTheme = UITheme();
+  final TemplateDefinitionService templateDefinitionService = TemplateDefinitionService();
   bool frontCameraToggle = false;
 
   // Flash Mode Options
@@ -85,6 +89,7 @@ class _CameraScreenState extends State<CameraScreen> {
     GeoCamTransport geoCamTransport = geoService.fetchGeoCamDetails();
     double parentWidth = MediaQuery.of(context).size.width;
     Color backgroundColor = Colors.black.withValues(alpha: 0.5);
+    TemplateTransport currentTemplateTransport = templateDefinitionService.getExtremeTemplate();
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -235,7 +240,13 @@ class _CameraScreenState extends State<CameraScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        GeoLocationDetail(geoCamContainerKey: _geoCamContainerKey, geoCamTransport: geoCamTransport),
+                        RepaintBoundary(
+                          key: _geoCamContainerKey,
+                          child: GeoLocationDetail(
+                            geoCamTransport: geoCamTransport,
+                            templateTransport: currentTemplateTransport,
+                          ),
+                        ),
                         Container(
                           color: Colors.black,
                           padding: const EdgeInsets.only(left: 25, right: 25),
@@ -315,7 +326,7 @@ class _CameraScreenState extends State<CameraScreen> {
                                   Column(
                                     children: [
                                       GestureDetector(
-                                        onTap: () {},
+                                        onTap: _templateOnTapHandler,
                                         child: Column(
                                           children: [
                                             Icon(Icons.grid_view_outlined, color: uiTheme.iconColor),
@@ -376,6 +387,16 @@ class _CameraScreenState extends State<CameraScreen> {
       MaterialPageRoute(
         //builder: (context) => AlbumScreen(albumPath: albumPath),
         builder: (context) => const PhotoThumbnailsScreen(),
+      ),
+    );
+  }
+
+  void _templateOnTapHandler() async {
+    // Navigate to the Collection to display the picture
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        //builder: (context) => AlbumScreen(albumPath: albumPath),
+        builder: (context) => const TemplateScreen(),
       ),
     );
   }

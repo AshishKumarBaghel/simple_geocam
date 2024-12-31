@@ -1,7 +1,7 @@
 class GeoCamWeatherTransport {
-  final String temperature;
-  final String wind;
-  final String altitude;
+  final double temperature;
+  final double wind;
+  final double altitude;
   final String compass;
   final String humidity;
   final String magneticField;
@@ -18,9 +18,9 @@ class GeoCamWeatherTransport {
   // Factory constructor to create an instance from JSON
   factory GeoCamWeatherTransport.fromJson(Map<String, dynamic> json) {
     return GeoCamWeatherTransport(
-      temperature: json['temperature'] as String,
-      wind: json['wind'] as String,
-      altitude: json['altitude'] as String,
+      temperature: json['temperature'] as double,
+      wind: json['wind'] as double,
+      altitude: json['altitude'] as double,
       compass: json['compass'] as String,
       humidity: json['humidity'] as String,
       magneticField: json['magneticField'] as String,

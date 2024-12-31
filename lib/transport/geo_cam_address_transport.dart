@@ -1,15 +1,15 @@
 class GeoCamAddressTransport {
   final String addressTitle;
   final String address;
-  final String lat;
-  final String lon;
+  final double lat;
+  final double long;
   final DateTime dateTime;
 
   GeoCamAddressTransport({
     required this.addressTitle,
     required this.address,
     required this.lat,
-    required this.lon,
+    required this.long,
     required this.dateTime,
   });
 
@@ -18,8 +18,8 @@ class GeoCamAddressTransport {
     return GeoCamAddressTransport(
       addressTitle: json['addressTitle'] as String,
       address: json['address'] as String,
-      lat: json['lat'] as String,
-      lon: json['lon'] as String,
+      lat: json['lat'] as double,
+      long: json['long'] as double,
       dateTime: json['dateTime'] as DateTime,
     );
   }
@@ -30,7 +30,7 @@ class GeoCamAddressTransport {
       'addressTitle': addressTitle,
       'address': address,
       'lat': lat,
-      'lon': lon,
+      'long': long,
       'dateTime': dateTime,
     };
   }

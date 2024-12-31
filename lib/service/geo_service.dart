@@ -17,18 +17,18 @@ class GeoService {
     GeoCamAddressTransport geoCamAddressTransport = GeoCamAddressTransport(
       addressTitle: 'Ujjain Madhya Pradesh, India',
       address: 'Mahananda Nagar, Ujjain - 456010, Madhya Pradesh, India',
-      lat: '23.1500',
-      lon: '75.802633',
+      lat: 23.1500,
+      long: 75.802633,
       dateTime: getCurrentDateTime(),
     );
 
     GeoCamWeatherTransport geoCamWeatherTransport = GeoCamWeatherTransport(
-      temperature: '76 °F',
-      wind: '8.0 mph',
-      altitude: '1636 ft',
-      compass: '225° SW',
-      humidity: '77%',
-      magneticField: '50 uT',
+      temperature: 76,
+      wind: 8.0,
+      altitude: 1636,
+      compass: '225°',
+      humidity: '77',
+      magneticField: '50',
     );
 
     return GeoCamTransport(address: geoCamAddressTransport, weather: geoCamWeatherTransport);

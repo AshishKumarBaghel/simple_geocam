@@ -1,0 +1,4 @@
+enum MapPosition {
+  left,
+  right,
+}

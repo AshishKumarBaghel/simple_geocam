@@ -28,6 +28,12 @@ class TemplateDefinitionService {
       return getHardTemplate();
     } else if ('simple' == templateKey) {
       return getSimpleTemplate();
+    } else if ('template 01' == templateKey) {
+      //TODO: 31.12.24 it should be fetched from database/preference
+      return getSimpleTemplate();
+    } else if ('template 02' == templateKey) {
+      //TODO: 31.12.24 it should be fetched from database/preference
+      return getClassicTemplate();
     }
     return getAdvanceTemplate();
   }

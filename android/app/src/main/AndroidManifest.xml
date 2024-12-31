@@ -45,8 +45,14 @@
     <!-- Google Admob Permission -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 
+    <!-- Microphone/Audio Permission -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <!-- Gallery Permission -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 
     <!-- Location Permission -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />

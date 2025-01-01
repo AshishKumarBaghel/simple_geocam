@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 class CameraButton extends StatefulWidget {
   final double size; // Size of the outer button (diameter)
   final VoidCallback onPressed; // Action when the button is pressed
+  final bool isWorking;
   final Color color;
 
   const CameraButton({
     super.key,
     required this.size,
     required this.onPressed,
+    this.isWorking = false,
     this.color = Colors.blue,
   });
 
@@ -84,14 +86,16 @@ class _CameraButtonState extends State<CameraButton> with SingleTickerProviderSt
               color: Colors.transparent, // Outer circle is transparent
             ),
             child: Center(
-              child: Container(
-                width: innerSize * 1.05,
-                height: innerSize * 1.05,
-                decoration: BoxDecoration(
-                  color: widget.color, // Inner circle color
-                  shape: BoxShape.circle,
-                ),
-              ),
+              child: (widget.isWorking)
+                  ? CircularProgressIndicator()
+                  : Container(
+                      width: innerSize * 1.05,
+                      height: innerSize * 1.05,
+                      decoration: BoxDecoration(
+                        color: widget.color, // Inner circle color
+                        shape: BoxShape.circle,
+                      ),
+                    ),
             ),
           );
         },

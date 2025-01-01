@@ -1,7 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:simple_geocam/constant/camera_default.dart';
 import 'package:simple_geocam/constant/ui_theme.dart';
 import 'package:simple_geocam/service/media_enricher_service.dart';
 import 'package:simple_geocam/service/media_repository.dart';
@@ -17,7 +16,6 @@ import '../preference/general_preference_service.dart';
 import '../service/geo_service.dart';
 import '../service/snack_bar_util.dart';
 import '../ui_widget/camera_button.dart';
-import 'display_picture_screen.dart';
 
 class CameraScreen extends StatefulWidget {
   final List<CameraDescription> cameras; // List of available cameras
@@ -38,6 +36,7 @@ class _CameraScreenState extends State<CameraScreen> {
   final TemplateDefinitionService templateDefinitionService = TemplateDefinitionService();
   final GeneralPreferenceService generalPreferenceService = GeneralPreferenceService();
   bool frontCameraToggle = false;
+  bool _isCameraWorking = false;
 
   // Flash Mode Options
   final List<FlashMode> _flashModes = [
@@ -70,21 +69,20 @@ class _CameraScreenState extends State<CameraScreen> {
       enableAudio: true, // Disable audio recording
     );
 
-    initializeCamera(controller: _controller);
+    initializeCamera();
   }
 
-  void initializeCamera({required CameraController controller}) {
+  void initializeCamera() {
     // Initialize the controller. This returns a Future.
-    _initializeControllerFuture = controller.initialize().then((_) {
+    _initializeControllerFuture = _controller.initialize().then((_) {
       // Lock the camera preview orientation to portrait (for example)
-      controller.lockCaptureOrientation(DeviceOrientation.portraitUp);
-
+      _controller.lockCaptureOrientation(DeviceOrientation.portraitUp);
+      _controller.setFlashMode(_flashModes[_flashModeIndex]);
       // Now the camera preview will *not rotate* automatically
       setState(() {});
     }).catchError((error) {
       print('Error initializing camera: $error');
     });
-    _controller.setFlashMode(_flashModes[_flashModeIndex]);
   }
 
   @override
@@ -338,20 +336,7 @@ class _CameraScreenState extends State<CameraScreen> {
                             color: backgroundColor,
                             elevation: 2,
                             // on selected we show the dialog box
-                            onSelected: (value) {
-                              final ResolutionPreset newResolutionPreset = _getCameraQualityResolution(value);
-                              resolutionPreset = newResolutionPreset;
-                              _controller = CameraController(
-                                widget.cameras.first, // The camera to use
-                                resolutionPreset, // Resolution preset
-                                enableAudio: true, // Disable audio recording
-                              );
-                              generalPreferenceService.saveCameraQuality(cameraQualityKey: value);
-                              initializeCamera(controller: _controller);
-                              setState(() {
-                                _cameraQualitySelectedValue = value; // Update the selected value
-                              });
-                            },
+                            onSelected: _cameraQualitySwitchOnPressed,
                           ),
                           IconButton(
                               onPressed: _frontCameraToggleOnPressed,
@@ -446,10 +431,10 @@ class _CameraScreenState extends State<CameraScreen> {
                                     ],
                                   ),
                                   CameraButton(
-                                    size: 64,
-                                    onPressed: cameraButtonOnPressed,
-                                    color: isCameraSelected ? uiTheme.brandColor : Colors.red,
-                                  ),
+                                      size: 64,
+                                      onPressed: cameraButtonOnPressed,
+                                      color: isCameraSelected ? uiTheme.brandColor : Colors.red,
+                                      isWorking: _isCameraWorking),
                                   Column(
                                     children: [
                                       GestureDetector(
@@ -484,6 +469,9 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   void cameraButtonOnPressed() {
+    setState(() {
+      _isCameraWorking = true;
+    });
     cameraButtonOnPressedAsync();
   }
 
@@ -494,11 +482,11 @@ class _CameraScreenState extends State<CameraScreen> {
 
       // Construct the path where the image should be saved
       final XFile cameraClickedImageFile = await _controller.takePicture();
-      SnackBarUtil().messageTop(context: context, message: 'Stamp added successfully');
       cameraButtonImageProcessing(cameraClickedImageFile);
     } catch (e) {
       // If an error occurs, log the error
       print('Error capturing photo: $e');
+      _isCameraWorking = false;
     }
   }
 
@@ -507,7 +495,10 @@ class _CameraScreenState extends State<CameraScreen> {
     final Uint8List originalBytes = await cameraClickedImageFile.readAsBytes();
     final Uint8List modifiedFinalImageBytes = await mediaEnricherService.mergeImagesBytes(originalBytes, modifiedPngBytes);
     /*final tmpFinalPhoto = */
-    await mediaRepository.savePhotoBytes(modifiedFinalImageBytes);
+    mediaRepository.savePhotoBytes(modifiedFinalImageBytes);
+    SnackBarUtil().messageTop(context: context, message: 'Stamp added successfully');
+    _isCameraWorking = false;
+    setState(() {});
     //TODO: temporary added to show clicked picture, in production can be removed!
     // Navigate to the DisplayPictureScreen to display the picture
     /*await Navigator.of(context).push(
@@ -557,7 +548,7 @@ class _CameraScreenState extends State<CameraScreen> {
       resolutionPreset, // Resolution preset
       enableAudio: false, // Disable audio recording
     );
-    initializeCamera(controller: _controller);
+    initializeCamera();
     setState(() {});
   }
 
@@ -633,5 +624,20 @@ class _CameraScreenState extends State<CameraScreen> {
       default:
         return ResolutionPreset.high;
     }
+  }
+
+  Future<void> _cameraQualitySwitchOnPressed(int cameraQualityIndexInput) async {
+    final ResolutionPreset newResolutionPreset = _getCameraQualityResolution(cameraQualityIndexInput);
+    resolutionPreset = newResolutionPreset;
+    _controller = CameraController(
+      widget.cameras.first, // The camera to use
+      resolutionPreset, // Resolution preset
+      enableAudio: true, // Disable audio recording
+    );
+    generalPreferenceService.saveCameraQuality(cameraQualityKey: cameraQualityIndexInput);
+    initializeCamera();
+    setState(() {
+      _cameraQualitySelectedValue = cameraQualityIndexInput; // Update the selected value
+    });
   }
 }

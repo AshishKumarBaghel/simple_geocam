@@ -13,8 +13,9 @@ import 'package:simple_geocam/transport/geo_cam_transport.dart';
 import 'package:simple_geocam/ui_widget/geo_location_detail.dart';
 
 import '../advertisement/admob_banner_ad.dart';
-import '../preference/camera_quality_preference_service.dart';
+import '../preference/general_preference_service.dart';
 import '../service/geo_service.dart';
+import '../service/snack_bar_util.dart';
 import '../ui_widget/camera_button.dart';
 import 'display_picture_screen.dart';
 
@@ -35,7 +36,7 @@ class _CameraScreenState extends State<CameraScreen> {
   final GlobalKey _geoCamContainerKey = GlobalKey();
   final UITheme uiTheme = UITheme();
   final TemplateDefinitionService templateDefinitionService = TemplateDefinitionService();
-  final CameraQualityPreferenceService cameraQualityPreferenceService = CameraQualityPreferenceService();
+  final GeneralPreferenceService generalPreferenceService = GeneralPreferenceService();
   bool frontCameraToggle = false;
 
   // Flash Mode Options
@@ -44,7 +45,7 @@ class _CameraScreenState extends State<CameraScreen> {
     FlashMode.auto,
     FlashMode.always,
   ];
-  int _flashModeIndex = CameraDefault().flashModeIndexDefault; // Track the current flash mode index
+  late int _flashModeIndex; // Track the current flash mode index
 
   final List<bool> mediaTypeSelection = [
     true, //index 0 camera
@@ -59,7 +60,8 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
-    _cameraQualitySelectedValue = cameraQualityPreferenceService.fetchCameraQuality();
+    _cameraQualitySelectedValue = generalPreferenceService.fetchCameraQuality();
+    _flashModeIndex = generalPreferenceService.fetchFlashMode();
     resolutionPreset = _getCameraQualityResolution(_cameraQualitySelectedValue);
     // Initialize the camera controller
     _controller = CameraController(
@@ -82,6 +84,7 @@ class _CameraScreenState extends State<CameraScreen> {
     }).catchError((error) {
       print('Error initializing camera: $error');
     });
+    _controller.setFlashMode(_flashModes[_flashModeIndex]);
   }
 
   @override
@@ -343,7 +346,7 @@ class _CameraScreenState extends State<CameraScreen> {
                                 resolutionPreset, // Resolution preset
                                 enableAudio: true, // Disable audio recording
                               );
-                              cameraQualityPreferenceService.saveCameraQuality(cameraQualityKey: value);
+                              generalPreferenceService.saveCameraQuality(cameraQualityKey: value);
                               initializeCamera(controller: _controller);
                               setState(() {
                                 _cameraQualitySelectedValue = value; // Update the selected value
@@ -480,29 +483,38 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
-  Future<void> cameraButtonOnPressed() async {
+  void cameraButtonOnPressed() {
+    cameraButtonOnPressedAsync();
+  }
+
+  Future<void> cameraButtonOnPressedAsync() async {
     try {
       // Ensure that the camera is initialized
       await _initializeControllerFuture;
 
       // Construct the path where the image should be saved
-      final XFile image = await _controller.takePicture();
-      final Uint8List modifiedPngBytes = await mediaEnricherService.captureAndSavePngBytes(_geoCamContainerKey);
-      final Uint8List originalBytes = await image.readAsBytes();
-      final Uint8List modifiedFinalImageBytes = await mediaEnricherService.mergeImagesBytes(originalBytes, modifiedPngBytes);
-      final tmpFinalPhoto = await mediaRepository.savePhotoBytes(modifiedFinalImageBytes);
-
-      //TODO: temporary added to show clicked picture, in production can be removed!
-      // Navigate to the DisplayPictureScreen to display the picture
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => DisplayPictureScreen(imagePath: tmpFinalPhoto.path),
-        ),
-      );
+      final XFile cameraClickedImageFile = await _controller.takePicture();
+      SnackBarUtil().messageTop(context: context, message: 'Stamp added successfully');
+      cameraButtonImageProcessing(cameraClickedImageFile);
     } catch (e) {
       // If an error occurs, log the error
       print('Error capturing photo: $e');
     }
+  }
+
+  Future<void> cameraButtonImageProcessing(XFile cameraClickedImageFile) async {
+    final Uint8List modifiedPngBytes = await mediaEnricherService.captureAndSavePngBytes(_geoCamContainerKey);
+    final Uint8List originalBytes = await cameraClickedImageFile.readAsBytes();
+    final Uint8List modifiedFinalImageBytes = await mediaEnricherService.mergeImagesBytes(originalBytes, modifiedPngBytes);
+    /*final tmpFinalPhoto = */
+    await mediaRepository.savePhotoBytes(modifiedFinalImageBytes);
+    //TODO: temporary added to show clicked picture, in production can be removed!
+    // Navigate to the DisplayPictureScreen to display the picture
+    /*await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => DisplayPictureScreen(imagePath: tmpFinalPhoto.path),
+        ),
+      );*/
   }
 
   void _collectionOnTapHandler() async {
@@ -572,6 +584,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   Future<void> _toggleFlashModeOnPressed() async {
     _flashModeIndex = (_flashModeIndex + 1) % _flashModes.length;
+    generalPreferenceService.saveFlashMode(flashModeIndex: _flashModeIndex);
     _changeFlashMode(_flashModes[_flashModeIndex]);
   }
 

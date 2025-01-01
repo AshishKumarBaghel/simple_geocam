@@ -56,7 +56,7 @@ enum Template {
   // Static method to get TemplateTransport by title
   static TemplateTransport getTransportByTitle(String title) {
     for (var template in Template.values) {
-      if (template.templateTitle.toLowerCase() == title) {
+      if (template.templateTitle.toLowerCase() == title.toLowerCase()) {
         return template.templateTransport;
       }
     }

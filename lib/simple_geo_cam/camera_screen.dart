@@ -13,6 +13,7 @@ import 'package:simple_geocam/transport/geo_cam_transport.dart';
 import 'package:simple_geocam/ui_widget/geo_location_detail.dart';
 
 import '../advertisement/admob_banner_ad.dart';
+import '../preference/camera_quality_preference_service.dart';
 import '../service/geo_service.dart';
 import '../ui_widget/camera_button.dart';
 import 'display_picture_screen.dart';
@@ -31,10 +32,10 @@ class _CameraScreenState extends State<CameraScreen> {
   final GeoService geoService = GeoService();
   final MediaEnricherService mediaEnricherService = MediaEnricherService();
   final MediaRepository mediaRepository = MediaRepository();
-  final ResolutionPreset resolutionPreset = ResolutionPreset.ultraHigh;
   final GlobalKey _geoCamContainerKey = GlobalKey();
   final UITheme uiTheme = UITheme();
   final TemplateDefinitionService templateDefinitionService = TemplateDefinitionService();
+  final CameraQualityPreferenceService cameraQualityPreferenceService = CameraQualityPreferenceService();
   bool frontCameraToggle = false;
 
   // Flash Mode Options
@@ -51,9 +52,15 @@ class _CameraScreenState extends State<CameraScreen> {
   ];
   bool isCameraSelected = true;
 
+  // Keep track of the currently selected resolution
+  late int _cameraQualitySelectedValue; // Default selected value (e.g., "High")
+  late ResolutionPreset resolutionPreset;
+
   @override
   void initState() {
     super.initState();
+    _cameraQualitySelectedValue = cameraQualityPreferenceService.fetchCameraQuality();
+    resolutionPreset = _getCameraQualityResolution(_cameraQualitySelectedValue);
     // Initialize the camera controller
     _controller = CameraController(
       widget.cameras.first, // The camera to use
@@ -225,7 +232,124 @@ class _CameraScreenState extends State<CameraScreen> {
                               }
                             },
                           ),
-                          IconButton(onPressed: _toggleFlashModeOnPressed, icon: _getFlashIcon()),
+                          IconButton(
+                            onPressed: _toggleFlashModeOnPressed,
+                            icon: _getFlashIcon(),
+                          ),
+                          PopupMenuButton<int>(
+                            icon: _getCameraQualityIcon(_cameraQualitySelectedValue),
+                            iconColor: uiTheme.iconOnColor,
+                            itemBuilder: (context) => [
+                              // PopupMenuItem 1 Color
+                              PopupMenuItem(
+                                value: 1,
+                                // row with 2 children
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.sd_outlined,
+                                      color: _cameraQualitySelectedValue == 1 ? uiTheme.iconOnColor : uiTheme.iconColor,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text("Low (352x288)", style: TextStyle(color: uiTheme.textColor))
+                                  ],
+                                ),
+                              ),
+                              // PopupMenuItem 2 Position
+                              PopupMenuItem(
+                                value: 2,
+                                // row with two children
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.equalizer_outlined,
+                                      color: _cameraQualitySelectedValue == 2 ? uiTheme.iconOnColor : uiTheme.iconColor,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text("Medium (~480p)", style: TextStyle(color: uiTheme.textColor))
+                                  ],
+                                ),
+                              ),
+                              // PopupMenuItem 3 Grid
+                              PopupMenuItem(
+                                value: 3,
+                                // row with 2 children
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.high_quality_outlined,
+                                      color: _cameraQualitySelectedValue == 3 ? uiTheme.iconOnColor : uiTheme.iconColor,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text("High (~720p)", style: TextStyle(color: uiTheme.textColor))
+                                  ],
+                                ),
+                              ),
+                              // PopupMenuItem 4 Timer
+                              PopupMenuItem(
+                                value: 4,
+                                // row with 2 children
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.hd_outlined,
+                                      color: _cameraQualitySelectedValue == 4 ? uiTheme.iconOnColor : uiTheme.iconColor,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text("Very High (~1080p)", style: TextStyle(color: uiTheme.textColor))
+                                  ],
+                                ),
+                              ),
+                              // PopupMenuItem 5 Ratio
+                              PopupMenuItem(
+                                value: 5,
+                                // row with 2 children
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.video_camera_back_outlined,
+                                      color: _cameraQualitySelectedValue == 5 ? uiTheme.iconOnColor : uiTheme.iconColor,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text("Ultra High (~2160p)", style: TextStyle(color: uiTheme.textColor))
+                                  ],
+                                ),
+                              ),
+                              // PopupMenuItem 6 Record Video with voice
+                              PopupMenuItem(
+                                value: 6,
+                                // row with two children
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.stars_outlined,
+                                      color: _cameraQualitySelectedValue == 6 ? uiTheme.iconOnColor : uiTheme.iconColor,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text("Max (Highest)", style: TextStyle(color: uiTheme.textColor))
+                                  ],
+                                ),
+                              ),
+                            ],
+                            offset: Offset(0, 55),
+                            color: backgroundColor,
+                            elevation: 2,
+                            // on selected we show the dialog box
+                            onSelected: (value) {
+                              final ResolutionPreset newResolutionPreset = _getCameraQualityResolution(value);
+                              resolutionPreset = newResolutionPreset;
+                              _controller = CameraController(
+                                widget.cameras.first, // The camera to use
+                                resolutionPreset, // Resolution preset
+                                enableAudio: true, // Disable audio recording
+                              );
+                              cameraQualityPreferenceService.saveCameraQuality(cameraQualityKey: value);
+                              initializeCamera(controller: _controller);
+                              setState(() {
+                                _cameraQualitySelectedValue = value; // Update the selected value
+                              });
+                            },
+                          ),
                           IconButton(
                               onPressed: _frontCameraToggleOnPressed,
                               icon: Icon(Icons.cameraswitch_outlined, color: getIconButtonColor(frontCameraToggle))),
@@ -454,5 +578,47 @@ class _CameraScreenState extends State<CameraScreen> {
   Future<void> _changeFlashMode(FlashMode flashMode) async {
     await _controller.setFlashMode(flashMode);
     setState(() {});
+  }
+
+  // ----------------------------------------------------------------
+  // HD CAMERA QUALITY MODE
+  // ----------------------------------------------------------------
+
+  Icon _getCameraQualityIcon(int cameraQualitySelectedValue) {
+    switch (cameraQualitySelectedValue) {
+      case 1:
+        return Icon(Icons.sd_outlined, color: uiTheme.iconOnColor);
+      case 2:
+        return Icon(Icons.equalizer_outlined, color: uiTheme.iconOnColor);
+      case 3:
+        return Icon(Icons.high_quality_outlined, color: uiTheme.iconOnColor);
+      case 4:
+        return Icon(Icons.hd_outlined, color: uiTheme.iconOnColor);
+      case 5:
+        return Icon(Icons.video_camera_back_outlined, color: uiTheme.iconOnColor);
+      case 6:
+        return Icon(Icons.stars_outlined, color: uiTheme.iconOnColor);
+      default:
+        return Icon(Icons.high_quality_outlined, color: uiTheme.iconOnColor);
+    }
+  }
+
+  ResolutionPreset _getCameraQualityResolution(int cameraQualitySelectedIndex) {
+    switch (cameraQualitySelectedIndex) {
+      case 1:
+        return ResolutionPreset.low;
+      case 2:
+        return ResolutionPreset.medium;
+      case 3:
+        return ResolutionPreset.high;
+      case 4:
+        return ResolutionPreset.veryHigh;
+      case 5:
+        return ResolutionPreset.ultraHigh;
+      case 6:
+        return ResolutionPreset.max;
+      default:
+        return ResolutionPreset.high;
+    }
   }
 }

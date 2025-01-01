@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:simple_geocam/service/geo_service.dart';
 import 'package:simple_geocam/template/service/template_definition_service.dart';
 import 'package:simple_geocam/template/template_preference_service.dart';
+import 'package:simple_geocam/template/transport/template.dart';
 import 'package:simple_geocam/template/transport/template_tile.dart';
 import 'package:simple_geocam/template/transport/template_transport.dart';
 import 'package:simple_geocam/ui_widget/geo_location_detail.dart';
@@ -25,7 +26,6 @@ class _TemplateScreenState extends State<TemplateScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _initTemplate();
   }
@@ -40,17 +40,17 @@ class _TemplateScreenState extends State<TemplateScreen> {
       ),
       TemplateTile(
         title: 'Template 01',
-        geoLocationDetail: geoLocationDetail(geoCamTransport, templateDefinitionService.getSimpleTemplate()),
+        geoLocationDetail: geoLocationDetail(geoCamTransport, Template.getTransportByTitle('Template 01')),
         titleStyle: titleMediumSize,
         isQuickTemplate: false,
-        isChecked: template == 'template 01',
+        isChecked: template == 'Template 01'.toLowerCase(),
       ),
       TemplateTile(
         title: 'Template 02',
-        geoLocationDetail: geoLocationDetail(geoCamTransport, templateDefinitionService.getClassicTemplate()),
+        geoLocationDetail: geoLocationDetail(geoCamTransport, Template.getTransportByTitle('Template 02')),
         titleStyle: titleMediumSize,
         isQuickTemplate: false,
-        isChecked: template == 'template 02',
+        isChecked: template == 'Template 02'.toLowerCase(),
       ),
       TemplateTile(
         title: 'Quick Templates',
@@ -58,33 +58,33 @@ class _TemplateScreenState extends State<TemplateScreen> {
       ),
       TemplateTile(
         title: 'Extreme',
-        geoLocationDetail: geoLocationDetail(geoCamTransport, templateDefinitionService.getExtremeTemplate()),
+        geoLocationDetail: geoLocationDetail(geoCamTransport, Template.getTransportByTitle('Extreme')),
         titleStyle: titleMediumSize,
-        isChecked: template == 'extreme',
+        isChecked: template == 'Extreme'.toLowerCase(),
       ),
       TemplateTile(
         title: 'Classic',
-        geoLocationDetail: geoLocationDetail(geoCamTransport, templateDefinitionService.getClassicTemplate()),
+        geoLocationDetail: geoLocationDetail(geoCamTransport, Template.getTransportByTitle('Classic')),
         titleStyle: titleMediumSize,
-        isChecked: template == 'classic',
+        isChecked: template == 'Classic'.toLowerCase(),
       ),
       TemplateTile(
         title: 'Advance',
         geoLocationDetail: geoLocationDetail(geoCamTransport, templateDefinitionService.getAdvanceTemplate()),
         titleStyle: titleMediumSize,
-        isChecked: template == 'advance',
+        isChecked: template == 'Advance'.toLowerCase(),
       ),
       TemplateTile(
         title: 'Hard',
-        geoLocationDetail: geoLocationDetail(geoCamTransport, templateDefinitionService.getHardTemplate()),
+        geoLocationDetail: geoLocationDetail(geoCamTransport, Template.getTransportByTitle('Hard')),
         titleStyle: titleMediumSize,
-        isChecked: template == 'hard',
+        isChecked: template == 'Hard'.toLowerCase(),
       ),
       TemplateTile(
         title: 'Simple',
-        geoLocationDetail: geoLocationDetail(geoCamTransport, templateDefinitionService.getSimpleTemplate()),
+        geoLocationDetail: geoLocationDetail(geoCamTransport, Template.getTransportByTitle('simple')),
         titleStyle: titleMediumSize,
-        isChecked: template == 'simple',
+        isChecked: template == 'Simple'.toLowerCase(),
       ),
     ];
   }
@@ -138,84 +138,6 @@ class _TemplateScreenState extends State<TemplateScreen> {
           );
         },
       ),
-    );
-  }
-
-/*ListView(
-        padding: const EdgeInsets.all(5.0),
-        children: [
-          Text(
-            'Quick Templates',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          SectionWidget(
-            title: 'Extreme',
-            geoLocationDetail: GeoLocationDetail(
-              geoCamTransport: geoCamTransport,
-              templateTransport: templateDefinitionService.getExtremeTemplate(),
-            ),
-          ),
-          SectionWidget(
-            title: 'Classic',
-            geoLocationDetail: GeoLocationDetail(
-              geoCamTransport: geoCamTransport,
-              templateTransport: templateDefinitionService.getClassicTemplate(),
-            ),
-          ),
-          SectionWidget(
-            title: 'Advance',
-            geoLocationDetail: GeoLocationDetail(
-              geoCamTransport: geoCamTransport,
-              templateTransport: templateDefinitionService.getAdvanceTemplate(),
-            ),
-          ),
-          SectionWidget(
-            title: 'Hard',
-            geoLocationDetail: GeoLocationDetail(
-              geoCamTransport: geoCamTransport,
-              templateTransport: templateDefinitionService.getHardTemplate(),
-            ),
-          ),
-          SectionWidget(
-            title: 'Simple',
-            geoLocationDetail: GeoLocationDetail(
-              geoCamTransport: geoCamTransport,
-              templateTransport: templateDefinitionService.getSimpleTemplate(),
-            ),
-          ),
-      ],
-    ),
-    );
-  }*/
-}
-
-class SectionWidget extends StatelessWidget {
-  final String title;
-  final GeoLocationDetail geoLocationDetail;
-
-  const SectionWidget({
-    super.key,
-    required this.title,
-    required this.geoLocationDetail,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Checkbox(value: true, onChanged: (value) {}),
-          ],
-        ),
-        geoLocationDetail,
-      ],
     );
   }
 }
